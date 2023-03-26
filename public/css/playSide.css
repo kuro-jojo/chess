@@ -1,0 +1,92 @@
+.new-game-focus-mode-time-selector {
+  margin-bottom: 1.6rem;
+}
+
+.board-layout-sidebar {
+  grid-area: top/sidebar;
+  height: 100%;
+  display: flex;
+  flex: 1;
+  flex-basis: 0%;
+  flex-basis: 0%;
+  flex-direction: column;
+  margin-top: var(--gutter);
+  min-height: var(--sidebarMinHeight);
+  width: 100%;
+}
+
+.focus-mode-controls-component {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;  padding-left: 1.6rem;
+  padding-right: 4rem;
+  position: relative;
+}
+
+.ui_v5-button-component.ui_v5-button-large.ui_v5-button-primary {
+  --secondaryBorderColor: rgba(0, 0, 0, 0.2);
+}
+.ui_v5-button-component.ui_v5-button-full {
+  /* min-height: var(--buttonHeight, 1rem); */
+  width: 50%;
+  word-break: break-word;
+}
+.ui_v5-button-component.ui_v5-button-large {
+  font-family: var(--globalSecondaryFont), sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-shadow: 0 0.1rem 0 var(--textShadowColor, rgba(0, 0, 0, 0.4));
+  transition: all 0.07s;
+}
+.ui_v5-button-component.ui_v5-button-primary {
+  background-color: #9aa8ae;
+  color: #fff;
+}
+.ui_v5-button-component.ui_v5-button-large {
+  --borderRadius: 1rem;
+  --borderHeight: 0.5rem;
+  --buttonHeight: 5.5rem;
+  --buttonPaddings: 0.5rem 3rem;
+}
+.ui_v5-button-component.ui_v5-button-primary {
+  --borderColor: #537133;
+}
+.board-layout,
+.board-layout * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+.ui_v5-button-component {
+  align-items: center;
+  border: 0;
+  border-radius: var(--borderRadius, 0.5rem);
+  box-shadow: 0 var(--borderHeight) 0 0 var(--borderColor),
+    0 0.7rem 0.95rem 0.05rem var(--secondaryBorderColor);
+  display: inline-flex;
+  font-size: var(--fontSize, 1.5rem);
+  font-weight: 600;
+  justify-content: center;
+  margin-bottom: var(--borderHeight);
+  max-width: 100%;
+  overflow: hidden;
+  padding: var(--buttonPaddings, 0.5rem 2rem);
+  position: relative;
+  text-align: center;
+}
+.ui_v5-button-component {
+  --borderHeight: 0.1rem;
+  --secondaryBorderColor: transparent;
+  --fontSize: 1.5rem;
+  --iconSize: 2.8rem;
+  --iconMargin: 0.5rem;
+  --disabledOpacity: 0.9;
+}
+button {
+  font-family: inherit;
+}
+a,
+button {
+  cursor: pointer;
+}

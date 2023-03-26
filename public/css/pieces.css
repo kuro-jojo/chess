@@ -1,0 +1,59 @@
+#board-single .piece.bp,
+#board-single .promotion-piece.bp {
+  background-image: url("../images/bp.png");
+}
+
+#board-single .piece.br,
+#board-single .promotion-piece.br {
+  background-image: url("../images/br.png");
+}
+
+#board-single .piece.bn,
+#board-single .promotion-piece.bn {
+  background-image: url("../images/bn.png");
+}
+
+#board-single .piece.bb,
+#board-single .promotion-piece.bb {
+  background-image: url("../images/bb.png");
+}
+
+#board-single .piece.bq,
+#board-single .promotion-piece.bq {
+  background-image: url("../images/bq.png");
+}
+
+#board-single .piece.bk,
+#board-single .promotion-piece.bk {
+  background-image: url("../images/bk.png");
+}
+
+#board-single .piece.wp,
+#board-single .promotion-piece.wp {
+  background-image: url("../images/wp.png");
+}
+
+#board-single .piece.wr,
+#board-single .promotion-piece.wr {
+  background-image: url("../images/wr.png");
+}
+
+#board-single .piece.wn,
+#board-single .promotion-piece.wn {
+  background-image: url("../images/wn.png");
+}
+
+#board-single .piece.wb,
+#board-single .promotion-piece.wb {
+  background-image: url("../images/wb.png");
+}
+
+#board-single .piece.wq,
+#board-single .promotion-piece.wq {
+  background-image: url("../images/wq.png");
+}
+
+#board-single .piece.wk,
+#board-single .promotion-piece.wk {
+  background-image: url("../images/wk.png");
+}

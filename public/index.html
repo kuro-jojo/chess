@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/index.css" type="text/css" />
+</head>
+
+<body class="board-layout with-players with-evaluation theatre-mode" style="--modifiedBoardWidth: 740px;">
+    <div id="board-layout-main" class="board-layout-main">
+        <div id="board-layout-player-top" class="board-layout-player board-layout-top">
+            <div class="player-component player-top player-theatre">
+
+                <div class="player-avatar-component player-avatar">
+                    <img data-cy="avatar" alt="Adversaire" src="https://www.chess.com/bundles/web/images/user-image.svg"
+                        width="40" height="40">
+                    <div class="presence-square-component">
+                        <div class="presence-square-square" style="width: 1rem; height: 1rem"></div>
+                    </div>
+                </div>
+                <div class="player-tagline">
+                    <div class="user-tagline-compact-theatre">
+                        <div class="user-tagline-compact-row">
+                            <!---->
+                            <a
+                                class="user-username-component user-username-link user-tagline-compact-username">Adversaire</a>
+                        </div>
+                        <div class="user-tagline-compact-row">
+                            <!---->
+                            <!---->
+                            <!---->
+                        </div>
+                    </div>
+                    <!---->
+                </div>
+                <!---->
+                <div class="clock-component clock-theatre clock-top clock-black">
+                    <div class="clock-arrow-arrow clock-arrow-top clock-arrow-black"></div>
+                    <div class="clock-bar-bar clock-bar-top clock-bar-black">
+                        <div class="clock-bar-remainder"></div>
+                    </div>
+                    <span data-cy="clock-time" class="clock-time-monospace">1:00</span>
+                </div>
+            </div>
+        </div>
+        <div id="board-layout-chessboard" class="board-layout-chessboard board-board">
+
+            <div id="board-layout-pieces" class="board-layout-pieces">
+                <div id="side-controls"></div>
+            </div>
+
+            <chess-board class="board" id="board-single"><svg viewBox="0 0 100 100" class="coordinates">
+                    <text x="0.75" y="3.5" font-size="2.8" class="coordinate-light">
+                        8
+                    </text>
+                    <text x="0.75" y="15.75" font-size="2.8" class="coordinate-dark">
+                        7
+                    </text>
+                    <text x="0.75" y="28.25" font-size="2.8" class="coordinate-light">
+                        6
+                    </text>
+                    <text x="0.75" y="40.75" font-size="2.8" class="coordinate-dark">
+                        5
+                    </text>
+                    <text x="0.75" y="53.25" font-size="2.8" class="coordinate-light">
+                        4
+                    </text>
+                    <text x="0.75" y="65.75" font-size="2.8" class="coordinate-dark">
+                        3
+                    </text>
+                    <text x="0.75" y="78.25" font-size="2.8" class="coordinate-light">
+                        2
+                    </text>
+                    <text x="0.75" y="90.75" font-size="2.8" class="coordinate-dark">
+                        1
+                    </text>
+                    <text x="10" y="99" font-size="2.8" class="coordinate-dark">
+                        a
+                    </text>
+                    <text x="22.5" y="99" font-size="2.8" class="coordinate-light">
+                        b
+                    </text>
+                    <text x="35" y="99" font-size="2.8" class="coordinate-dark">
+                        c
+                    </text>
+                    <text x="47.5" y="99" font-size="2.8" class="coordinate-light">
+                        d
+                    </text>
+                    <text x="60" y="99" font-size="2.8" class="coordinate-dark">
+                        e
+                    </text>
+                    <text x="72.5" y="99" font-size="2.8" class="coordinate-light">
+                        f
+                    </text>
+                    <text x="85" y="99" font-size="2.8" class="coordinate-dark">
+                        g
+                    </text>
+                    <text x="97.5" y="99" font-size="2.8" class="coordinate-light">
+                        h
+                    </text></svg><!--/Coordinates-->
+                <div class="element-pool"></div>
+                <div class="element-pool" data-test-element=""></div>
+                <div class="element-pool" data-test-element=""></div>
+                <!--/Squares--><!--/Blinking Highlights--><!--/Effects-->
+                <div class="hover-square" style="visibility: hidden">
+                    <svg viewBox="0 0 100 100">
+                        <rect x="0" y="0" width="100" height="100" stroke="rgba(255, 255, 255, 0.65)" stroke-width="10"
+                            fill="none"></rect>
+                    </svg>
+                </div>
+                <!--/Hover Square--><!--/Effects-->
+                <div class="piece wp square-22"></div>
+                <div class="piece square-78 bn"></div>
+                <div class="piece wp square-12"></div>
+                <div class="piece square-58 bk"></div>
+                <div class="piece wr square-81"></div>
+                <div class="piece wn square-71"></div>
+                <div class="piece wb square-61"></div>
+                <div class="piece wk square-51"></div>
+                <div class="piece bp square-87"></div>
+                <div class="piece wb square-31"></div>
+                <div class="piece wn square-21"></div>
+                <div class="piece wr square-11"></div>
+                <div class="piece wp square-32"></div>
+                <div class="piece wp square-42"></div>
+                <div class="piece wp square-62"></div>
+                <div class="piece bp square-17"></div>
+                <div class="piece wp square-82"></div>
+                <div class="piece square-72 wp"></div>
+                <div class="piece bp square-27"></div>
+                <div class="piece square-52 wp"></div>
+                <div class="piece bp square-37"></div>
+                <div class="piece bp square-47"></div>
+                <div class="piece bp square-57"></div>
+                <div class="piece bp square-67"></div>
+                <div class="piece bp square-77"></div>
+                <div class="piece br square-18"></div>
+                <div class="piece bn square-28"></div>
+                <div class="piece bb square-38"></div>
+                <div class="piece square-41 wq"></div>
+                <div class="piece bq square-48"></div>
+                <div class="piece bb square-68"></div>
+                <div class="piece br square-88"></div>
+                <!--/Pieces--><!--/Custom Items--><!--/MoveHints--><!--/Capture Hints--><svg viewBox="0 0 100 100"
+                    class="arrows"></svg><!--/Arrows--><!--/Promotion Window--><!--/Fade Setup-->
+            </chess-board>
+        </div>
+        <div id="board-layout-player-bottom" class="board-layout-player board-layout-bottom">
+            <div class="player-component player-bottom player-theatre">
+
+                <div class="player-avatar-component player-avatar">
+                    <img data-cy="avatar" alt="kuro_O8"
+                        src="//images.chesscomfiles.com/uploads/user/116251604.9a5a77db.78x78o.2817251c7c9a@3x.jpeg"
+                        width="40" height="40">
+                    <div class="presence-square-component">
+                        <div class="presence-square-square" style="width: 1rem; height: 1rem"></div>
+                    </div>
+                </div>
+                <div class="player-tagline">
+                    <div class="user-tagline-compact-theatre">
+                        <div class="user-tagline-compact-row">
+                            <!---->
+                            <a
+                                class="user-username-component user-username-link user-tagline-compact-username">kuro_O8</a>
+                        </div>
+                    </div>
+                    <!---->
+                </div>
+                <!---->
+                <div class="clock-component clock-theatre clock-bottom clock-white">
+                    <div class="clock-arrow-arrow clock-arrow-bottom undefined"></div>
+                    <div class="clock-bar-bar clock-bar-bottom clock-bar-white">
+                        <div class="clock-bar-remainder"></div>
+                    </div>
+                    <span data-cy="clock-time" class="clock-time-monospace">1:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="board-layout-sidebar" class="board-layout-sidebar">
+
+        <div class="focus-mode-controls-component" style="height: 744px;"><!----> <!---->
+            <div>
+                <div data-cy="new-game-time-selector" class="new-game-focus-mode-time-selector"><button
+                        class="selector-button-button" data-cy="new-game-time-selector-button"><span
+                            class="icon-font-chess selector-button-icon icon-colored bullet"></span> <span
+                            class="selector-button-label">1 | 1</span> <span
+                            class="icon-font-chess selector-button-chevron chevron-bottom"></span></button> <!---->
+                    <!---->
+                </div> <button type="button"
+                    class="ui_v5-button-component ui_v5-button-primary ui_v5-button-large ui_v5-button-full"
+                    data-cy="focus-mode-play">
+                    Jouer
+                </button>
+            </div> <!----> <!----> <!---->
+        </div>
+    </div>
+
+    <script>
+
+        // get the chess board and pieces from the DOM
+        const board = document.getElementById("board-single");
+        const pieces = document.querySelectorAll(".piece");
+        const selectedPieceSquareColor = "rgba(165, 126, 53, 0.7)"
+
+        // track the currently selected piece
+        let selectedPiece = null;
+
+        // add event listeners to each chess piece
+        pieces.forEach((piece) => {
+            piece.addEventListener("mousedown", () => {
+                // set the starting position of the piece
+                piece.style.position = "absolute";
+                piece.style.left = "0";
+                piece.style.top = "0";
+                // store the current position of the piece
+                selectedPiece = {
+                    element: piece,
+                    x: piece.offsetLeft,
+                    y: piece.offsetTop,
+                };
+                piece.style.backgroundColor = selectedPieceSquareColor
+            });
+        });
+
+        // add event listeners to the chess board to handle piece movement
+        board.addEventListener("mousemove", (event) => {
+            // check if a piece is currently selected
+            if (selectedPiece !== null) {
+                // move the selected piece to the new position
+                selectedPiece.element.style.left = event.pageX + "px";
+                selectedPiece.element.style.top = event.pageY + "px";
+                console.log(board.style.left)
+
+            }
+        });
+
+        board.addEventListener("mouseup", (event) => {
+            // check if a piece is currently selected
+            if (selectedPiece !== null) {
+                // check if the new position is a valid move
+                if (isValidMove(selectedPiece, event)) {
+                    // move the piece to the new position
+                    selectedPiece.element.style.left = "0";
+                    selectedPiece.element.style.top = "0";
+                } else {
+                    // return the piece to its original position
+                    selectedPiece.element.style.left = "0";
+                    selectedPiece.element.style.top = "0";
+                }
+                
+                selectedPiece.element.style.backgroundColor = ""
+                // reset the selected piece
+                selectedPiece = null;
+            }
+        });
+
+        // function to check if a move is valid
+        function isValidMove(piece, event) {
+            // check if the piece can move to the new position based on the rules of chess
+            // return true or false based on whether the move is valid
+        }
+
+    </script>
+</body>
+
+</html>
