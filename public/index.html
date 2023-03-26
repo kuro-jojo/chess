@@ -47,8 +47,9 @@
             <div id="board-layout-pieces" class="board-layout-pieces">
                 <div id="side-controls"></div>
             </div>
+            <chess-board class="board" id="board-single">
+                <svg viewBox="0 0 100 100" class="coordinates">
 
-            <chess-board class="board" id="board-single"><svg viewBox="0 0 100 100" class="coordinates">
                     <text x="0.75" y="3.5" font-size="2.8" class="coordinate-light">
                         8
                     </text>
@@ -96,17 +97,14 @@
                     </text>
                     <text x="97.5" y="99" font-size="2.8" class="coordinate-light">
                         h
-                    </text></svg><!--/Coordinates-->
+                    </text>
+                </svg><!--/Coordinates-->
                 <div class="element-pool"></div>
                 <div class="element-pool" data-test-element=""></div>
                 <div class="element-pool" data-test-element=""></div>
-                <!--/Squares--><!--/Blinking Highlights--><!--/Effects-->
-                <div class="hover-square" style="visibility: hidden">
-                    <svg viewBox="0 0 100 100">
-                        <rect x="0" y="0" width="100" height="100" stroke="rgba(255, 255, 255, 0.65)" stroke-width="10"
-                            fill="none"></rect>
-                    </svg>
-                </div>
+                
+                <div id="grid-overlay"></div>
+
                 <!--/Hover Square--><!--/Effects-->
                 <div class="piece wp square-22"></div>
                 <div class="piece square-78 bn"></div>
@@ -140,9 +138,9 @@
                 <div class="piece bq square-48"></div>
                 <div class="piece bb square-68"></div>
                 <div class="piece br square-88"></div>
-                <!--/Pieces--><!--/Custom Items--><!--/MoveHints--><!--/Capture Hints--><svg viewBox="0 0 100 100"
-                    class="arrows"></svg><!--/Arrows--><!--/Promotion Window--><!--/Fade Setup-->
+                <svg viewBox="0 0 100 100" class="arrows"></svg>
             </chess-board>
+
         </div>
         <div id="board-layout-player-bottom" class="board-layout-player board-layout-bottom">
             <div class="player-component player-bottom player-theatre">
@@ -196,71 +194,7 @@
         </div>
     </div>
 
-    <script>
-
-        // get the chess board and pieces from the DOM
-        const board = document.getElementById("board-single");
-        const pieces = document.querySelectorAll(".piece");
-        const selectedPieceSquareColor = "rgba(165, 126, 53, 0.7)"
-
-        // track the currently selected piece
-        let selectedPiece = null;
-
-        // add event listeners to each chess piece
-        pieces.forEach((piece) => {
-            piece.addEventListener("mousedown", () => {
-                // set the starting position of the piece
-                piece.style.position = "absolute";
-                piece.style.left = "0";
-                piece.style.top = "0";
-                // store the current position of the piece
-                selectedPiece = {
-                    element: piece,
-                    x: piece.offsetLeft,
-                    y: piece.offsetTop,
-                };
-                piece.style.backgroundColor = selectedPieceSquareColor
-            });
-        });
-
-        // add event listeners to the chess board to handle piece movement
-        board.addEventListener("mousemove", (event) => {
-            // check if a piece is currently selected
-            if (selectedPiece !== null) {
-                // move the selected piece to the new position
-                selectedPiece.element.style.left = event.pageX + "px";
-                selectedPiece.element.style.top = event.pageY + "px";
-                console.log(board.style.left)
-
-            }
-        });
-
-        board.addEventListener("mouseup", (event) => {
-            // check if a piece is currently selected
-            if (selectedPiece !== null) {
-                // check if the new position is a valid move
-                if (isValidMove(selectedPiece, event)) {
-                    // move the piece to the new position
-                    selectedPiece.element.style.left = "0";
-                    selectedPiece.element.style.top = "0";
-                } else {
-                    // return the piece to its original position
-                    selectedPiece.element.style.left = "0";
-                    selectedPiece.element.style.top = "0";
-                }
-                
-                selectedPiece.element.style.backgroundColor = ""
-                // reset the selected piece
-                selectedPiece = null;
-            }
-        });
-
-        // function to check if a move is valid
-        function isValidMove(piece, event) {
-            // check if the piece can move to the new position based on the rules of chess
-            // return true or false based on whether the move is valid
-        }
-
+    <script src="board.js">
     </script>
 </body>
 

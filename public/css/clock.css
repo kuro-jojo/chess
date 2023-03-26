@@ -958,7 +958,7 @@
     bottom:10rem
    }
    .player-component.player-theatre.player-bottom .player-tagline {
-    bottom:6.5rem
+    bottom:2.5rem
    }
    .player-component.player-theatre.player-bottom .player-pieces {
     bottom:-1.5rem
@@ -1083,7 +1083,7 @@
    .clock-component.clock-theatre {
     background-clip:content-box;
     font-size:2.6rem;
-    height:5rem;
+    height:3rem;
     justify-content:center;
     line-height:4.4rem;
     padding-right:0;
