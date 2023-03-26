@@ -3,9 +3,9 @@
 This is a web-based multiplayer chess game implemented in JavaScript using Node.js and the following modules:
 
 - `express`
-<!-- - `socket.io` -->
-<!-- - `chess.js` -->
-<!-- - `chessboard.js` -->
+  <!-- - `socket.io` -->
+  <!-- - `chess.js` -->
+  <!-- - `chessboard.js` -->
 
 ## Installation
 
@@ -38,7 +38,6 @@ This project is licensed under the MIT License. -->
 - [Jonathan ASSAMAGAN](https://github.com/kuro-jojo)
 - [Mouhamadou Kane](https://github.com/Mouhamadou305)
 
-## Acknowledgments
+<!-- ## Acknowledgments
 
-<!-- - Thanks to [Chess.js](https://github.com/jhlywa/chess.js) and [Chessboard.js](https://github.com/oakmac/chessboardjs) for providing the chess engine and the chessboard UI respectively. -->
-- Thanks to Chess.com for inspiring the design
+- Thanks to [Chess.js](https://github.com/jhlywa/chess.js) and [Chessboard.js](https://github.com/oakmac/chessboardjs) for providing the chess engine and the chessboard UI respectively. -->
