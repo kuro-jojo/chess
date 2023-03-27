@@ -1,4 +1,4 @@
-
+import * as P from "./pieces.js";
 /**
  * @typedef {Object} Piece
  * @property {Element} element - the piece
@@ -16,4 +16,5 @@
  * @property {number} width - The width of the square.
  * @property {number} height - The height of the square.
  * @property {HTMLElement} div - The HTML element representing the square.
+ * @property {P.Piece} piece
  */

@@ -1,3 +1,6 @@
+import * as C from "./consts.js";
+import * as T from "./types.js";
+
 export class Piece {
     /** 
     * @type {Number} value the theroric value of the piece
@@ -15,7 +18,7 @@ export class Piece {
 
     /**
      * @param {[col, row]} piecePosition the current position (square) of the piece
-     * @param {[square]} squares the square position where to move the pawn
+     * @param {[T.Square]} squares the square position where to move the pawn
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(piecePosition, desiredSquare) {
@@ -33,44 +36,68 @@ export class Pawn extends Piece {
 
     /**
      * @param {[col, row]} pawnPosition the current position (square) of the pawn
-     * @param {[square]} squares the square position where to move the pawn
+     * @param {[T.Square]} squares the square position where to move the pawn
      * 
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(pawnPosition, squares) {
+        console.log(pawnPosition);
         let possiblesMoves = [];
         // pawn can move 1 square ahead 
-        if (this.color === 'w') {
+        if (this.color === C.WHITE_PIECE) {
             if (pawnPosition[1] < 8) {
-                possiblesMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))])
+                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))]);
                 // can capture one square in diagonal
                 if (0 < pawnPosition[0] < 8) {
                     // check if there is enemy on the diagonal
-                    
-                    possiblesMoves.push(squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] + 1))])
-                    possiblesMoves.push(squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] + 1))])
+                    const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] + 1))];
+                    const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] + 1))];
+
+                    checkEnemyDiagonal(this, diag1, diag2);
                 }
             }
             // but can move 2 if it's the first time is moving
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))])
+                possiblesMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))]);
             }
-        } else if (this.color === 'b') {
+        } else if (this.color === C.BLACK_PIECE) {
             if (pawnPosition[1] > 0) {
-                possiblesMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))])
+                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))]);
                 if (0 < pawnPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] - 1))])
-                    possiblesMoves.push(squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] - 1))])
+                    const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] - 1))];
+                    const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] - 1))];
+
+                    checkEnemyDiagonal(this, diag1, diag2);
                 }
             }
-            if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))])
+            if (!this.hasMoved) {
+                possiblesMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))]);
             }
         }
         // en passant stuff
+        /**
+         * 
+         * @param {T.Square} diag1 
+         * @param {T.Square} diag2 
+         */
+        function checkEnemyDiagonal(piece, diag1, diag2) {
+            console.log(piece, diag1, diag2);
+            if (diag1.piece && diag1.piece.color !== piece.color) {
+                possiblesMoves.push(diag1);
+            }
+            if (diag2.piece && diag2.piece.color !== piece.color) {
+                possiblesMoves.push(diag2);
+            }
+        }
 
+        function checkEnemyFront(piece, front) {
+            console.log(piece, front);
+            if (!front.piece) {
+                possiblesMoves.push(front);
+            }
+        }
         return possiblesMoves.filter((value) => value !== undefined);
-        
+
     }
 }
 
@@ -84,14 +111,14 @@ export class Knight extends Piece {
 
     /**
      * @param {[col, row]} knightPosition the current position (square) of the knight
-     * @param {[square]} squares the square position where to move the knight
+     * @param {[T.Square]} squares the square position where to move the knight
      * 
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(knightPosition, squares) {
         let possiblesMoves = [];
         // knight can move 1 square ahead 
-        if (this.color === 'w') {
+        if (this.color === C.WHITE_PIECE) {
             if (knightPosition[1] < 8) {
                 possiblesMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] + 1))])
                 // can capture one square in diagonal
@@ -104,7 +131,7 @@ export class Knight extends Piece {
             if (this.hasMoved !== true) {
                 possiblesMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] + 2))])
             }
-        } else if (this.color === 'b') {
+        } else if (this.color === C.BLACK_PIECE) {
             if (knightPosition[1] > 0) {
                 possiblesMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] - 1))])
                 if (0 < knightPosition[0] < 8) {
@@ -132,14 +159,14 @@ export class Bishop extends Piece {
 
     /**
      * @param {[col, row]} bishopPosition the current position (square) of the bishop
-     * @param {[square]} squares the square position where to move the bishop
+     * @param {[T.Square]} squares the square position where to move the bishop
      * 
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(bishopPosition, squares) {
         let possiblesMoves = [];
         // bishop can move 1 square ahead 
-        if (this.color === 'w') {
+        if (this.color === WHITE_PIECE) {
             if (bishopPosition[1] < 8) {
                 possiblesMoves.push(squares[parseInt("" + bishopPosition[0] + (bishopPosition[1] + 1))])
                 // can capture one square in diagonal
@@ -152,7 +179,7 @@ export class Bishop extends Piece {
             if (this.hasMoved !== true) {
                 possiblesMoves.push(squares[parseInt("" + bishopPosition[0] + (bishopPosition[1] + 2))])
             }
-        } else if (this.color === 'b') {
+        } else if (this.color === C.BLACK_PIECE) {
             if (bishopPosition[1] > 0) {
                 possiblesMoves.push(squares[parseInt("" + bishopPosition[0] + (bishopPosition[1] - 1))])
                 if (0 < bishopPosition[0] < 8) {
@@ -180,14 +207,14 @@ export class Rook extends Piece {
 
     /**
      * @param {[col, row]} rookPosition the current position (square) of the rook
-     * @param {[square]} squares the square position where to move the rook
+     * @param {[T.Square]} squares the square position where to move the rook
      * 
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(rookPosition, squares) {
         let possiblesMoves = [];
         // rook can move 1 square ahead 
-        if (this.color === 'w') {
+        if (this.color === WHITE_PIECE) {
             if (rookPosition[1] < 8) {
                 possiblesMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] + 1))])
                 // can capture one square in diagonal
@@ -200,7 +227,7 @@ export class Rook extends Piece {
             if (this.hasMoved !== true) {
                 possiblesMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] + 2))])
             }
-        } else if (this.color === 'b') {
+        } else if (this.color === C.BLACK_PIECE) {
             if (rookPosition[1] > 0) {
                 possiblesMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] - 1))])
                 if (0 < rookPosition[0] < 8) {
@@ -228,14 +255,14 @@ export class Queen extends Piece {
 
     /**
      * @param {[col, row]} queenPosition the current position (square) of the queen
-     * @param {[square]} squares the square position where to move the queen
+     * @param {[T.Square]} squares the square position where to move the queen
      * 
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(queenPosition, squares) {
         let possiblesMoves = [];
         // queen can move 1 square ahead 
-        if (this.color === 'w') {
+        if (this.color === WHITE_PIECE) {
             if (queenPosition[1] < 8) {
                 possiblesMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] + 1))])
                 // can capture one square in diagonal
@@ -248,7 +275,7 @@ export class Queen extends Piece {
             if (this.hasMoved !== true) {
                 possiblesMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] + 2))])
             }
-        } else if (this.color === 'b') {
+        } else if (this.color === C.BLACK_PIECE) {
             if (queenPosition[1] > 0) {
                 possiblesMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] - 1))])
                 if (0 < queenPosition[0] < 8) {
@@ -276,14 +303,14 @@ export class King extends Piece {
 
     /**
      * @param {[col, row]} kingPosition the current position (square) of the king
-     * @param {[square]} squares the square position where to move the king
+     * @param {[T.Square]} squares the square position where to move the king
      * 
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(kingPosition, squares) {
         let possiblesMoves = [];
         // king can move 1 square ahead 
-        if (this.color === 'w') {
+        if (this.color === WHITE_PIECE) {
             if (kingPosition[1] < 8) {
                 possiblesMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] + 1))])
                 // can capture one square in diagonal
@@ -296,7 +323,7 @@ export class King extends Piece {
             if (this.hasMoved !== true) {
                 possiblesMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] + 2))])
             }
-        } else if (this.color === 'b') {
+        } else if (this.color === C.BLACK_PIECE) {
             if (kingPosition[1] > 0) {
                 possiblesMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] - 1))])
                 if (0 < kingPosition[0] < 8) {

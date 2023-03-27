@@ -1,4 +1,7 @@
+import * as C from "./consts.js";
 import * as Pieces from "./pieces.js";
+import * as T from "./types.js";
+// import { Piece } from "./types.js";
 
 // get the chess board and pieces from the DOM
 const board = document.getElementById("board-single");
@@ -7,32 +10,34 @@ const pieces = document.querySelectorAll(".piece");
 const selectedPieceSquareColor = "rgba(165, 126, 53, 0.7)";
 const previousSquareColor = "rgba(165, 126, 53, 0.5)";
 
-const WHITE_PIECE = "w";
-const BLACK_PIECE = "b";
-let currentPlayer = WHITE_PIECE;
+// First player is white
+let currentPlayer = C.WHITE_PIECE;
 
 // track the currently selected piece
 /**
- * @type {Piece}
+ * @type {T.Piece}
  */
 let selectedPiece = null;
 /**
- * @type {Square}
+ * @type {T.Square}
  */
 let previousMovedSquare = null;
 /**
- * @type {Square}
+ * @type {T.Square}
  */
 let previousMovedPiece = null;
 
 /**
- * @type {Square[]}
+ * @type {T.Square[]}
  */
 let squares = (function () {
     // Get the dimensions of each cell in the grid
     let cellWidth = board.clientWidth / 8;
     let cellHeight = board.clientHeight / 8;
-    let squares = [];
+    /**
+     * @type {T.Square[]}
+     */
+    let squares = []
     // Iterate through each cell in the grid
     for (let row = 8; row >= 1; row--) {
         for (let col = 1; col <= 8; col++) {
@@ -46,7 +51,7 @@ let squares = (function () {
             gridOverlay.appendChild(squareDiv);
             // Create an object to represent the current square
             /**
-             * @type {Square}
+             * @type {T.Square}
              */
             let square = {
                 col: col,
@@ -54,6 +59,7 @@ let squares = (function () {
                 width: cellWidth,
                 height: cellHeight,
                 div: squareDiv,
+                piece: null,
             };
             squareDiv.addEventListener("click", (event) => {
                 if (selectedPiece) {
@@ -64,6 +70,19 @@ let squares = (function () {
             squares[parseInt("" + col + row)] = square;
         }
     }
+
+    // TODO: Fix pawn not seeing last ranks ennemies
+
+    // (function init() {
+    //     const rows = [1, 2, 7, 8];
+    //     rows.forEach(row => {
+    //         for (let col = 1; col <= 8; col++) {
+    //             // say that there is something on those squares
+
+    //             squares[parseInt("" + row + col)].piece = new Pieces.Pawn(C.WHITE_PIECE);
+    //         }
+    //     });
+    // })();
     return squares;
 })();
 
@@ -98,22 +117,23 @@ pieces.forEach((piece) => {
             };
             piece.style.backgroundColor = selectedPieceSquareColor;
         }
+        // console.log(selectedPiece.position);
         getAvailableMoves(selectedPiece);
     });
 });
 
 /**
  *
- * @param {Piece} selectedPiece
- * @param {Square} squareToMove the square where to move the piece
- * @returns {Piece|null} 
+ * @param {T.Piece} selectedPiece
+ * @param {T.Square} squareToMove the square where to move the piece
+ * @returns {T.Piece|null} 
  */
 function movePiece(selectedPiece, squareToMove) {
     // if it is not the turn of the right player he cannot move the piece
     if (currentPlayer !== selectedPiece.color) {
         return selectedPiece;
     }
-    
+
     // reset the color of the previous move
     if (previousMovedSquare) {
         previousMovedSquare.style.backgroundColor = "";
@@ -124,7 +144,6 @@ function movePiece(selectedPiece, squareToMove) {
     // the square where to move might be a valid one
     if (!getAvailableMoves(selectedPiece, false).includes(squareToMove)) {
         selectedPiece.element.style.backgroundColor = "";
-        console.log(selectedPiece);
         return null;
     }
 
@@ -132,11 +151,11 @@ function movePiece(selectedPiece, squareToMove) {
     const piece = selectedPiece.element;
     const pieceClassName = piece.className;
 
-    // Change the piece square's
     const squarePositionClassName = /square-\d+/;
     const squareNewPostionClassName = "square-" + squareToMove.col + squareToMove.row;
-    const cuurentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
+    const currentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
 
+    // move the piece
     piece.className = piece.className.replace(
         squarePositionClassName,
         squareNewPostionClassName
@@ -147,13 +166,27 @@ function movePiece(selectedPiece, squareToMove) {
     // }
 
     // we store this square move which will stay highlighted
-    previousMovedSquare = squares[parseInt(cuurentPosition)].div;
+    previousMovedSquare = squares[parseInt(currentPosition)].div;
     previousMovedSquare.style.backgroundColor = previousSquareColor;
+    console.log(squares[parseInt(currentPosition)]);
 
     previousMovedPiece = selectedPiece;
 
     // after moving the piece we switch player turn
-    currentPlayer = currentPlayer === WHITE_PIECE ? BLACK_PIECE : WHITE_PIECE;
+    currentPlayer = currentPlayer === C.WHITE_PIECE ? C.BLACK_PIECE : C.WHITE_PIECE;
+    // let sq = squares[squares.indexOf(squareToMove)] ;
+
+    // if it's a pawn make sure no to have the possibility to move up 2 squares
+    squareToMove.piece = selectedPiece.object;
+
+    if (selectedPiece.type === C.PAWN) {
+        squareToMove.piece.hasMoved = true;
+    }
+
+    squares[squares.indexOf(squareToMove)] = squareToMove;
+
+    // remove the selected piece from the squares.
+    squares[squares.indexOf(selectedPiece.position)].piece = null;
 
     return null;
 }
@@ -167,28 +200,28 @@ function getPieceProperties(piece) {
     const properties = {};
     const pieceType = piece.className.match(/\b[w|b][a-z]\b/gi);
 
-    properties.color = pieceType[0][0] == WHITE_PIECE ? WHITE_PIECE : BLACK_PIECE;
+    properties.color = pieceType[0][0] == C.WHITE_PIECE ? C.WHITE_PIECE : C.BLACK_PIECE;
     properties.type = pieceType[0][1];
 
     properties.position = getPiecePositionSquare(piece);
 
     switch (properties.type) {
-        case "p":
+        case C.PAWN:
             properties.pieceObject = new Pieces.Pawn(properties.color);
             break;
-        case "n":
+        case C.KNIGHT:
             properties.pieceObject = new Pieces.Knight(properties.color);
             break;
-        case "b":
+        case C.BISHOP:
             properties.pieceObject = new Pieces.Bishop(properties.color);
             break;
-        case "r":
+        case C.ROOK:
             properties.pieceObject = new Pieces.Rook(properties.color);
             break;
-        case "q":
+        case C.QUEEN:
             properties.pieceObject = new Pieces.Queen(properties.color);
             break;
-        case "k":
+        case C.KING:
             properties.pieceObject = new Pieces.King(properties.color);
             break;
         default:
@@ -200,7 +233,7 @@ function getPieceProperties(piece) {
 /**
  * Return a square object that represent the position of the piece
  * @param {HTMLElement} piece
- * @returns {Square} A square object
+ * @returns {T.Square} A square object
  */
 function getPiecePositionSquare(piece) {
     const squarePositionByClassName = /square-\d+/;
@@ -213,31 +246,45 @@ function getPiecePositionSquare(piece) {
 
 /**
  *
- * @param {Piece} selectedPiece
+ * @param {T.Piece} selectedPiece
  * @param {Boolean} toDisplay if false, hide the moves
  */
 function getAvailableMoves(selectedPiece, toDisplay = true) {
     if (!selectedPiece) {
         return;
     }
-    console.log('heeerrrrrre')
+    // console.log(selectedPiece)
     if (selectedPiece.color === currentPlayer) {
         const position = [selectedPiece.position.col, selectedPiece.position.row]
         /**
-         * @type {Square[]}
+         * @type {T.Square[]}
          */
-        const moves = selectedPiece.object.getPossibleMoves(position, squares);
-        console.log(moves);
+        let moves = [];
+        if (selectedPiece.position.piece) {
+            moves = selectedPiece.position.piece.getPossibleMoves(position, squares);
+        } else {
+            moves = selectedPiece.object.getPossibleMoves(position, squares);
+        }
         moves.forEach((square) => {
             // square.div.style.borderColor = "red";
             if (!toDisplay) {
                 square.div.style.backgroundColor = "";
+                square.div.style.border = "none";
+
             } else {
-                square.div.style.backgroundColor = "rgba(153, 164, 141, 0.3)";
+                if (square.piece) {
+                    square.div.style.backgroundColor = "rgba(225, 0, 0, 0.8)";
+                    square.div.style.border = "5px solid red";
+
+                } else
+                    square.div.style.backgroundColor = "rgba(153, 164, 141, 0.3)";
+
             }
         });
+        // console.log(moves);
         return moves;
     }
 
     return []
 }
+
