@@ -6,6 +6,11 @@ export class Piece {
     * @type {Number} value the theroric value of the piece
     */
     static value;
+    
+    /**
+     * @type {string}
+     */
+    static type;
 
     /**
      * 
@@ -29,6 +34,7 @@ export class Piece {
 export class Pawn extends Piece {
     static value = 1;
 
+    static type = C.PAWN;
     constructor(color) {
         super(color);
         this.hasMoved = false;
@@ -41,7 +47,6 @@ export class Pawn extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(pawnPosition, squares) {
-        console.log(pawnPosition);
         let possiblesMoves = [];
         // pawn can move 1 square ahead 
         if (this.color === C.WHITE_PIECE) {
@@ -52,7 +57,8 @@ export class Pawn extends Piece {
                     // check if there is enemy on the diagonal
                     const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] + 1))];
                     const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] + 1))];
-
+                    
+                    // console.log(diag1, diag2)
                     checkEnemyDiagonal(this, diag1, diag2);
                 }
             }
@@ -81,7 +87,6 @@ export class Pawn extends Piece {
          * @param {T.Square} diag2 
          */
         function checkEnemyDiagonal(piece, diag1, diag2) {
-            console.log(piece, diag1, diag2);
             if (diag1.piece && diag1.piece.color !== piece.color) {
                 possiblesMoves.push(diag1);
             }
@@ -91,7 +96,6 @@ export class Pawn extends Piece {
         }
 
         function checkEnemyFront(piece, front) {
-            console.log(piece, front);
             if (!front.piece) {
                 possiblesMoves.push(front);
             }
@@ -166,7 +170,7 @@ export class Bishop extends Piece {
     getPossibleMoves(bishopPosition, squares) {
         let possiblesMoves = [];
         // bishop can move 1 square ahead 
-        if (this.color === WHITE_PIECE) {
+        if (this.color === C.WHITE_PIECE) {
             if (bishopPosition[1] < 8) {
                 possiblesMoves.push(squares[parseInt("" + bishopPosition[0] + (bishopPosition[1] + 1))])
                 // can capture one square in diagonal
@@ -214,7 +218,7 @@ export class Rook extends Piece {
     getPossibleMoves(rookPosition, squares) {
         let possiblesMoves = [];
         // rook can move 1 square ahead 
-        if (this.color === WHITE_PIECE) {
+        if (this.color === C.WHITE_PIECE) {
             if (rookPosition[1] < 8) {
                 possiblesMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] + 1))])
                 // can capture one square in diagonal
@@ -262,7 +266,7 @@ export class Queen extends Piece {
     getPossibleMoves(queenPosition, squares) {
         let possiblesMoves = [];
         // queen can move 1 square ahead 
-        if (this.color === WHITE_PIECE) {
+        if (this.color === C.WHITE_PIECE) {
             if (queenPosition[1] < 8) {
                 possiblesMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] + 1))])
                 // can capture one square in diagonal
@@ -310,7 +314,7 @@ export class King extends Piece {
     getPossibleMoves(kingPosition, squares) {
         let possiblesMoves = [];
         // king can move 1 square ahead 
-        if (this.color === WHITE_PIECE) {
+        if (this.color === C.WHITE_PIECE) {
             if (kingPosition[1] < 8) {
                 possiblesMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] + 1))])
                 // can capture one square in diagonal

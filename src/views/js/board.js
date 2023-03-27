@@ -10,9 +10,12 @@ const pieces = document.querySelectorAll(".piece");
 const selectedPieceSquareColor = "rgba(165, 126, 53, 0.7)";
 const previousSquareColor = "rgba(165, 126, 53, 0.5)";
 
+
+const capturedPieces = new Map();
+
 // First player is white
 let currentPlayer = C.WHITE_PIECE;
-
+let playerMadeCapture = false;
 // track the currently selected piece
 /**
  * @type {T.Piece}
@@ -95,40 +98,68 @@ pieces.forEach((piece) => {
         piece.style.left = "0";
         piece.style.top = "0";
 
+
         // hide the availabeles moves when another piece is selected 
         if (selectedPiece) {
-            getAvailableMoves(selectedPiece, false);
+            const sq = getAvailableMoves(selectedPiece, false);
+            let p = [];
+            const tmp_piece = createPieceObjectByHtmlElement(piece);
+
+            sq.forEach(s => {
+                // if in the square there is the piece we select now we move the selected piece into that square
+                if (s && s === tmp_piece.position) {
+                    playerMadeCapture = true;
+                    selectedPiece = movePiece(selectedPiece, s, true);
+                    return
+                }
+            });
+            // if it is player turn and he already selected a piece then if he tried to select another capturable piece we capture it
+
+        }
+        if (playerMadeCapture) {
+            playerMadeCapture = false;
+            return;
         }
         if (selectedPiece && selectedPiece.element === piece) {
             piece.style.backgroundColor = "";
             selectedPiece = null;
 
         } else if (selectedPiece == null || selectedPiece.element !== piece) {
+
             // store the current position of the piece
             if (selectedPiece !== null && selectedPiece.element !== piece) {
                 selectedPiece.element.style.backgroundColor = "";
+                // when we captured a piece the square is auto selected so we avoid that
+                getAvailableMoves(selectedPiece, false);
             }
-            selectedPiece = {
-                element: piece,
-                color: getPieceProperties(piece).color,
-                type: getPieceProperties(piece).type,
-                object: getPieceProperties(piece).pieceObject,
-                position: getPieceProperties(piece).position,
-            };
+            selectedPiece = createPieceObjectByHtmlElement(piece);
             piece.style.backgroundColor = selectedPieceSquareColor;
         }
-        // console.log(selectedPiece.position);
         getAvailableMoves(selectedPiece);
     });
 });
 
 /**
+ * 
+ * @param {HtmlElement} piece 
+ */
+function createPieceObjectByHtmlElement(piece) {
+    return {
+        element: piece,
+        color: getPieceProperties(piece).color,
+        type: getPieceProperties(piece).type,
+        object: getPieceProperties(piece).pieceObject,
+        position: getPieceProperties(piece).position,
+    };
+}
+/**
  *
  * @param {T.Piece} selectedPiece
  * @param {T.Square} squareToMove the square where to move the piece
+ * @param {boolean} toCapurePiece if or not the move is aim to capture a piece
  * @returns {T.Piece|null} 
  */
-function movePiece(selectedPiece, squareToMove) {
+function movePiece(selectedPiece, squareToMove, toCapurePiece = false) {
     // if it is not the turn of the right player he cannot move the piece
     if (currentPlayer !== selectedPiece.color) {
         return selectedPiece;
@@ -160,15 +191,22 @@ function movePiece(selectedPiece, squareToMove) {
         squarePositionClassName,
         squareNewPostionClassName
     );
-    // if (pieceClassName.match(squarePositionClassName) !== null) {
-    // } else {
-    //     throw Error("Not a valid piece or square");
-    // }
+
+    if (toCapurePiece) {
+        // save the piece captured with the num of move as key
+        // capturedPieces.set(squareToMove.piece, )
+        // remove the captured piece from the board
+        const elements = document.getElementsByClassName(
+            `${squareNewPostionClassName} 
+            ${squareToMove.piece.color}${squareToMove.piece.constructor.type}`
+            );
+        elements[0].parentNode.removeChild(elements[0]);
+    }
 
     // we store this square move which will stay highlighted
     previousMovedSquare = squares[parseInt(currentPosition)].div;
     previousMovedSquare.style.backgroundColor = previousSquareColor;
-    console.log(squares[parseInt(currentPosition)]);
+    // console.log(squares[parseInt(currentPosition)]);
 
     previousMovedPiece = selectedPiece;
 
@@ -176,7 +214,7 @@ function movePiece(selectedPiece, squareToMove) {
     currentPlayer = currentPlayer === C.WHITE_PIECE ? C.BLACK_PIECE : C.WHITE_PIECE;
     // let sq = squares[squares.indexOf(squareToMove)] ;
 
-    // if it's a pawn make sure no to have the possibility to move up 2 squares
+    // if it's a pawn make sure not to have the possibility to move up 2 squares
     squareToMove.piece = selectedPiece.object;
 
     if (selectedPiece.type === C.PAWN) {
@@ -248,12 +286,14 @@ function getPiecePositionSquare(piece) {
  *
  * @param {T.Piece} selectedPiece
  * @param {Boolean} toDisplay if false, hide the moves
+ * 
+ * @returns {T.Square[]} list of all available squares to move
  */
 function getAvailableMoves(selectedPiece, toDisplay = true) {
     if (!selectedPiece) {
         return;
     }
-    // console.log(selectedPiece)
+    // console.log("selectedPiece", selectedPiece)
     if (selectedPiece.color === currentPlayer) {
         const position = [selectedPiece.position.col, selectedPiece.position.row]
         /**
@@ -265,26 +305,36 @@ function getAvailableMoves(selectedPiece, toDisplay = true) {
         } else {
             moves = selectedPiece.object.getPossibleMoves(position, squares);
         }
-        moves.forEach((square) => {
-            // square.div.style.borderColor = "red";
-            if (!toDisplay) {
-                square.div.style.backgroundColor = "";
-                square.div.style.border = "none";
+        displayAvailableMoves(moves, toDisplay);
 
-            } else {
-                if (square.piece) {
-                    square.div.style.backgroundColor = "rgba(225, 0, 0, 0.8)";
-                    square.div.style.border = "5px solid red";
-
-                } else
-                    square.div.style.backgroundColor = "rgba(153, 164, 141, 0.3)";
-
-            }
-        });
-        // console.log(moves);
         return moves;
     }
 
     return []
 }
+/**
+ * 
+ * @param {T.Square} squareToMove 
+ */
+function capturePiece(squareToMove) {
 
+}
+
+function displayAvailableMoves(moves, toDisplay) {
+    moves.forEach((square) => {
+        // square.div.style.borderColor = "red";
+        if (!toDisplay) {
+            square.div.style.backgroundColor = "";
+            square.div.style.border = "none";
+
+        } else {
+            if (square.piece) {
+                square.div.style.backgroundColor = "rgba(225, 0, 0, 0.8)";
+                square.div.style.border = "5px solid red";
+
+            } else
+                square.div.style.backgroundColor = "rgba(153, 164, 141, 0.3)";
+
+        }
+    });
+}
