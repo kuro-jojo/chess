@@ -21,6 +21,12 @@ let currentPlayer = C.WHITE_PIECE;
 // Player's id
 let myId= document.getElementById("my-id").value
 
+// Oponent's id
+let oponentId= ""
+
+// color of the player
+let currentIdColor=C.WHITE_PIECE;
+
 // track the currently selected piece
 /**
  * @type {T.Piece}
@@ -96,9 +102,9 @@ let squares = (function () {
 
 // add event listener to play button
 play.addEventListener("click", () => {
-    playerId= document.getElementById("oponent-id").value;
-    if (playerId!=""){
-        startGame();
+    oponentId= document.getElementById("oponent-id").value;
+    if (oponentId!=""){
+        initiateGame(oponentId);
     }
 });
 
@@ -138,18 +144,35 @@ pieces.forEach((piece) => {
     });
 });
 
+//Accepts a game started by an oponent
+socket.on('gameStart', gameStart => {
+    if (gameStart[1] == myId){
+        socket.emit('gameAccepted', gameStart);
+    }
+    currentIdColor= C.BLACK_PIECE
+});
+
+//Starts a game accepted by an oponent
+socket.on('gameAccepted', gameAccepted => {
+    if (gameAccepted[0] == myId){
+        socket.emit('gameAccepted', startGame(gameAccepted));
+    }
+    currentIdColor= C.WHITE_PIECE
+});
+
 /**
- * Starts a new game against the specified oponent
+ * Initiates a new game against the specified oponent
  * @param {String} oponentId - The id of the oponent
  * @returns {void}
  */
-function startGame(oponentId) {
-    socket.emit('gameStart', oponentId);
+function initiateGame(oponentId) {
+    socket.emit('gameStart', [myId, oponentId]);
 }
 
-socket.on('gameStart', gameStart => {
-    if (gameStart == myId)
-});
+
+function startGame(oponentId) {
+    socket.emit('gameStart', [myId, oponentId]);
+}
 
 /**
  *
@@ -283,7 +306,7 @@ function getAvailableMoves(selectedPiece, toDisplay = true) {
         return;
     }
     // console.log(selectedPiece)
-    if (selectedPiece.color === currentPlayer) {
+    if (selectedPiece.color === currentPlayer && currentIdColor === selectedPiece.color) {
         const position = [selectedPiece.position.col, selectedPiece.position.row]
         /**
          * @type {T.Square[]}
