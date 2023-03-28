@@ -206,7 +206,6 @@ pieces.forEach((piece) => {
 
 //Accepts a game started by an oponent
 socket.on('gameStart', gameStart => {
-    console.log(gameStart);
     if (gameStart[1] == myId){
         console.log('Accepting game ...');
         socket.emit('gameAccepted', gameStart);
@@ -228,7 +227,7 @@ socket.on('gameAccepted', gameAccepted => {
 
 socket.on('squares', function(squrs) {
     if (squrs[3] != myId){
-        console.log('Receiving move ...'+JSON.parse(squrs[4])["className"]+document.getElementsByClassName(JSON.parse(squrs[4])["className"])[0]);
+        console.log('Receiving move ...');
         squrs[0].element= document.getElementsByClassName(JSON.parse(squrs[4]).className)[0];
 
         let pc= JSON.parse(squrs[6]);
@@ -257,7 +256,6 @@ socket.on('squares', function(squrs) {
         pc= JSON.parse(squrs[5]);
         // squrs[1].piece= new Pieces.Piece(pc["color"], JSON.parse(pc["possibleMoves"]) );
         squrs[1].div = squares[""+squrs[1].col+squrs[1].row].div;
-        console.log(squrs);
         movePiece(squrs[0], squrs[1], false, false);
     }
 });
@@ -294,7 +292,6 @@ function createPieceObjectByHtmlElement(piece) {
  * @returns {T.Piece|null}
  */
 function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=true) {
-    console.log(selectedPiece, squareToMove, toCapturePiece)
     const selP= {...selectedPiece};
     const sqtm= {...squareToMove};
     const tcp= {...toCapturePiece};
@@ -302,15 +299,12 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
     if (currentPlayer !== selectedPiece.color) {
         return selectedPiece;
     }
-    console.log("a");
     // reset the color of the previous move
     if (previousMovedSquare) {
         previousMovedSquare.style.backgroundColor = "";
-        console.log("b");
     }
     if (previousMovedPiece) {
         previousMovedPiece.element.style.backgroundColor = "";
-        console.log("c");
     }
     // the square where to move might be a valid one
     let incl= false;
@@ -322,12 +316,10 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
     });
 
     if (!incl) {
-        console.log(getAvailableMoves(selectedPiece, true));
         selectedPiece.element.style.backgroundColor = "";
-        console.log("d");
         return null;
     }
-    console.log("e");
+
     const pieceSave = selectedPiece.element.cloneNode(true);
     const piece = selectedPiece.element;
     const squarePositionClassName = /square-\d+/;
@@ -339,7 +331,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
         squarePositionClassName,
         squareNewPostionClassName
     );
-        console.log(piece);
+
     if (toCapturePiece) {
         // save the piece captured with the num of move as key
         // capturedPieces.set(squareToMove.piece, )
@@ -349,7 +341,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
             ${squareToMove.piece.color}${squareToMove.piece.constructor.type}`
         );
         elements[0].parentNode.removeChild(elements[0]);
-        console.log("f");
     }
 
     // we store this square move which will stay highlighted
@@ -365,10 +356,8 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
 
     // if it's a pawn make sure not to have the possibility to move up 2 squares
     squareToMove.piece = selectedPiece.object;
-    console.log("g");
     if (selectedPiece.type === C.PAWN) {
         squareToMove.piece.hasMoved = true;
-        console.log("h");
     }
 
     squares[squares.indexOf(squareToMove)] = squareToMove;
@@ -409,7 +398,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
         const pieceJSON2 = JSON.stringify(pieceJ2);
 
         socket.emit('squares', [selP, sqtm, tcp, myId, elementJson, pieceJSON, pieceJSON2]);
-        console.log("socket");
     }
     return null;
 }
@@ -475,11 +463,11 @@ function getPiecePositionSquare(piece) {
  * @returns {T.Square[]} list of all available squares to move
  */
 function getAvailableMoves(selectedPiece, toDisplay = true, noskip=true) {
+
     if (!selectedPiece) {
         return;
     }
-    // console.log(selectedPiece)
-    console.log(selectedPiece.color, currentPlayer, currentIdColor)
+    
     if ( (selectedPiece.color === currentPlayer && currentIdColor === selectedPiece.color)  || (selectedPiece.color === currentPlayer && !noskip )  ) {
         const position = [selectedPiece.position.col, selectedPiece.position.row]
         /**
