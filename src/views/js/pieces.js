@@ -82,7 +82,7 @@ export class Pawn extends Piece {
             }
             // but can move 2 if it's the first time is moving
             if (this.hasMoved !== true) {
-                this.possibleMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))]);
+                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))]);
             }
         } else if (this.color === C.BLACK_PIECE) {
             if (pawnPosition[1] > 0) {
@@ -95,7 +95,7 @@ export class Pawn extends Piece {
                 }
             }
             if (!this.hasMoved) {
-                this.possibleMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))]);
+                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))]);
             }
         }
         // en passant stuff
