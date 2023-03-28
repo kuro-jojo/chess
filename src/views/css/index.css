@@ -149,7 +149,7 @@ html {
   font-size: var(--user-username, 1.4rem);
   font-weight: 600;
   line-height: 1.3;
-user-select: text;
+  user-select: text;
 }
 
 .player-component.player-theatre.player-bottom .player-avatar {
@@ -173,5 +173,5 @@ user-select: text;
 }
 
 .piece {
-  transition: transform 0.2s  ;
+  transition: transform 0.2s;
 }

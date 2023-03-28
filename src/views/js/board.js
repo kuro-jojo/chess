@@ -55,9 +55,7 @@ let previousMovedPiece = null;
  * @type {T.Square[]}
  */
 let squares = (function () {
-    // Get the dimensions of each cell in the grid
-    let cellWidth = board.clientWidth / 8;
-    let cellHeight = board.clientHeight / 8;
+
     /**
      * @type {T.Square[]}
      */
@@ -66,6 +64,9 @@ let squares = (function () {
     for (let row = 8; row >= 1; row--) {
         for (let col = 1; col <= 8; col++) {
             let squareDiv = document.createElement("div");
+            // Get the dimensions of each cell in the grid
+            let cellWidth = board.clientWidth / 8;
+            let cellHeight = board.clientHeight / 8;
 
             // Set the class and position of the div element
             squareDiv.className = "square";
@@ -84,7 +85,8 @@ let squares = (function () {
                 height: cellHeight,
                 div: squareDiv,
                 piece: null,
-            };
+            }
+
             squareDiv.addEventListener("click", (event) => {
                 if (selectedPiece) {
                     // move the piece
@@ -105,7 +107,7 @@ let squares = (function () {
             squares[parseInt(`${col}${rows[2]}`)].piece = new Pieces.Pawn(C.BLACK_PIECE);
         }
         // 1. White , 8. Black
-        init_pieces(1, C.ROOK); 
+        init_pieces(1, C.ROOK);
         init_pieces(8, C.ROOK);
         init_pieces(1, C.BISHOP);
         init_pieces(8, C.BISHOP);
@@ -284,6 +286,7 @@ function createPieceObjectByHtmlElement(piece) {
         position: getPieceProperties(piece).position,
     };
 }
+
 /**
  *
  * @param {T.Piece} selectedPiece
@@ -307,6 +310,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
         previousMovedPiece.element.style.backgroundColor = "";
     }
     // the square where to move might be a valid one
+
     let incl= false;
     getAvailableMoves(selectedPiece, false, noskip).forEach(move => {
         if (move.col === squareToMove.col && move.row === squareToMove.row){
@@ -321,12 +325,63 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
     }
 
     const pieceSave = selectedPiece.element.cloneNode(true);
+
     const piece = selectedPiece.element;
     const squarePositionClassName = /square-\d+/;
-    const squareNewPostionClassName = "square-" + squareToMove.col + squareToMove.row;
+    const squareNewPostionClassName = `square-${squareToMove.col}${squareToMove.row}`;
     const currentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
 
+    // if is the king
+    if (selectedPiece.type === C.KING && !selectedPiece.object.hasMoved) {
+
+        // if the square to move is for short castling
+        let rook = null;
+        let rookPosition = null;
+        /**
+         * @type {T.Square}
+         */
+        let rookSquare = {
+            width: squareToMove.width,
+            height: squareToMove.height,
+            row: squareToMove.row,
+        };
+
+        let rookNewPosition = null;
+
+        if (squareToMove.col === 7 && getAvailableMoves(selectedPiece, false).includes(squareToMove)) {
+            rookPosition = `${8}${squareToMove.row}`;
+            rookSquare.col = squareToMove.col - 1;
+        }
+        // if the square to move is for long castling
+        else if (squareToMove.col === 3 && getAvailableMoves(selectedPiece, false).includes(squareToMove)) {
+            rookPosition = `${1}${squareToMove.row}`;
+            rookSquare.col = squareToMove.col + 1;
+        }
+
+        rook = document.getElementsByClassName(`square-${rookPosition}`);
+
+        if (rook[0]) {
+            rookNewPosition = `square-${rookSquare.col}${rookSquare.row}`;
+            rookSquare.div = squareToMove.div;
+            rookSquare.piece = squares[parseInt(rookPosition.match(/\d{2}/)[0])].piece;
+            rookSquare.piece.hasMoved = true;
+            selectedPiece.object.hasMoved = true;
+
+            rook[0].className = rook[0].className.replace(
+                squarePositionClassName,
+                rookNewPosition
+            );
+            // // update the rook position in the squares array
+            squares[parseInt(rookNewPosition.match(/\d{2}/)[0])].piece = rookSquare.piece;
+
+            // // remove the selected piece from the squares.
+            squares[parseInt(rookPosition.match(/\d{2}/)[0])].piece = null;
+            // squares[parseInt(rookPosition.match(/\d{2}/)[0])].div.className = "square";
+        }
+
+    }
     // move the piece
+
     piece.className = piece.className.replace(
         squarePositionClassName,
         squareNewPostionClassName
@@ -346,7 +401,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
     // we store this square move which will stay highlighted
     previousMovedSquare = squares[parseInt(currentPosition)].div;
     previousMovedSquare.style.backgroundColor = previousSquareColor;
-    // console.log(squares[parseInt(currentPosition)]);
 
     previousMovedPiece = selectedPiece;
 
@@ -356,18 +410,8 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
 
     // if it's a pawn make sure not to have the possibility to move up 2 squares
     squareToMove.piece = selectedPiece.object;
-    if (selectedPiece.type === C.PAWN) {
-        squareToMove.piece.hasMoved = true;
-    }
-
-    squares[squares.indexOf(squareToMove)] = squareToMove;
-
-    // remove the selected piece from the squares.
-    squares[squares.indexOf(selectedPiece.position)].piece = null;
-
-
+    
     if(noskip){
-        console.log('Sending move ...');
 
         const elementData = {
         id: pieceSave.id,
@@ -399,6 +443,15 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
 
         socket.emit('squares', [selP, sqtm, tcp, myId, elementJson, pieceJSON, pieceJSON2]);
     }
+
+if (selectedPiece.type === C.PAWN || selectedPiece.type === C.KING || selectedPiece.type === C.ROOK) {
+        squareToMove.piece.hasMoved = true;
+    }
+
+    // update the square where the piece is moved
+    squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = squareToMove.piece;
+    squares[parseInt(currentPosition)].piece = null;
+    
     return null;
 }
 
