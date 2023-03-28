@@ -76,16 +76,50 @@ let squares = (function () {
 
     // TODO: Fix pawn not seeing last ranks ennemies
 
-    // (function init() {
-    //     const rows = [1, 2, 7, 8];
-    //     rows.forEach(row => {
-    //         for (let col = 1; col <= 8; col++) {
-    //             // say that there is something on those squares
+    (function init() {
+        const rows = [1, 2, 7, 8];
+        for (let col = 1; col <= 8; col++) {
+            // pawns on 2 and 7 rank
+            squares[parseInt(`${col}${rows[1]}`)].piece = new Pieces.Pawn(C.WHITE_PIECE);
+            squares[parseInt(`${col}${rows[2]}`)].piece = new Pieces.Pawn(C.BLACK_PIECE);
+        }
 
-    //             squares[parseInt("" + row + col)].piece = new Pieces.Pawn(C.WHITE_PIECE);
-    //         }
-    //     });
-    // })();
+        init_pieces(1, C.ROOK);
+        init_pieces(8, C.ROOK);
+        init_pieces(1, C.BISHOP);
+        init_pieces(8, C.BISHOP);
+        init_pieces(1, C.KNIGHT);
+        init_pieces(8, C.KNIGHT);
+        init_pieces(1, C.QUEEN);
+        init_pieces(1, C.KING);
+
+        // init pieces
+        function init_pieces(row, type) {
+            const color = row === 1 ? C.WHITE_PIECE : C.BLACK_PIECE;
+            switch (type) {
+                case C.ROOK:
+                    squares[parseInt(`${1}${row}`)].piece = new Pieces.Rook(color);
+                    squares[parseInt(`${8}${row}`)].piece = new Pieces.Rook(color);
+                    break;
+                case C.BISHOP:
+                    squares[parseInt(`${3}${row}`)].piece = new Pieces.Bishop(color);
+                    squares[parseInt(`${6}${row}`)].piece = new Pieces.Bishop(color);
+                    break;
+                case C.KNIGHT:
+                    squares[parseInt(`${2}${row}`)].piece = new Pieces.Knight(color);
+                    squares[parseInt(`${7}${row}`)].piece = new Pieces.Rook(color);
+                    break;
+                case C.QUEEN:
+                    squares[parseInt(`${4}${row}`)].piece = new Pieces.Queen(color);
+                    break;
+                case C.QUEEN:
+                    squares[parseInt(`${5}${row}`)].piece = new Pieces.King(color);
+                    break;
+                default:
+                    break;
+            }
+        }
+    })();
     return squares;
 })();
 
@@ -98,7 +132,6 @@ pieces.forEach((piece) => {
         piece.style.left = "0";
         piece.style.top = "0";
 
-
         // hide the availabeles moves when another piece is selected 
         if (selectedPiece) {
             const sq = getAvailableMoves(selectedPiece, false);
@@ -109,7 +142,7 @@ pieces.forEach((piece) => {
                 // if in the square there is the piece we select now we move the selected piece into that square
                 if (s && s === tmp_piece.position) {
                     playerMadeCapture = true;
-                    selectedPiece = movePiece(selectedPiece, s, true);
+                    movePiece(selectedPiece, s, true);
                     return
                 }
             });
@@ -178,10 +211,7 @@ function movePiece(selectedPiece, squareToMove, toCapurePiece = false) {
         return null;
     }
 
-
     const piece = selectedPiece.element;
-    const pieceClassName = piece.className;
-
     const squarePositionClassName = /square-\d+/;
     const squareNewPostionClassName = "square-" + squareToMove.col + squareToMove.row;
     const currentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
@@ -199,7 +229,7 @@ function movePiece(selectedPiece, squareToMove, toCapurePiece = false) {
         const elements = document.getElementsByClassName(
             `${squareNewPostionClassName} 
             ${squareToMove.piece.color}${squareToMove.piece.constructor.type}`
-            );
+        );
         elements[0].parentNode.removeChild(elements[0]);
     }
 

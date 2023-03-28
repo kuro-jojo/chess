@@ -6,7 +6,7 @@ export class Piece {
     * @type {Number} value the theroric value of the piece
     */
     static value;
-    
+
     /**
      * @type {string}
      */
@@ -47,28 +47,28 @@ export class Pawn extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(pawnPosition, squares) {
-        let possiblesMoves = [];
+        let possibleMoves = [];
         // pawn can move 1 square ahead 
         if (this.color === C.WHITE_PIECE) {
             if (pawnPosition[1] < 8) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))]);
+                checkEnemyFront(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))]);
                 // can capture one square in diagonal
                 if (0 < pawnPosition[0] < 8) {
                     // check if there is enemy on the diagonal
                     const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] + 1))];
                     const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] + 1))];
-                    
+
                     // console.log(diag1, diag2)
                     checkEnemyDiagonal(this, diag1, diag2);
                 }
             }
             // but can move 2 if it's the first time is moving
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))]);
+                possibleMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))]);
             }
         } else if (this.color === C.BLACK_PIECE) {
             if (pawnPosition[1] > 0) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))]);
+                checkEnemyFront(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))]);
                 if (0 < pawnPosition[0] < 8) {
                     const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] - 1))];
                     const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] - 1))];
@@ -77,7 +77,7 @@ export class Pawn extends Piece {
                 }
             }
             if (!this.hasMoved) {
-                possiblesMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))]);
+                possibleMoves.push(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))]);
             }
         }
         // en passant stuff
@@ -88,19 +88,19 @@ export class Pawn extends Piece {
          */
         function checkEnemyDiagonal(piece, diag1, diag2) {
             if (diag1.piece && diag1.piece.color !== piece.color) {
-                possiblesMoves.push(diag1);
+                possibleMoves.push(diag1);
             }
             if (diag2.piece && diag2.piece.color !== piece.color) {
-                possiblesMoves.push(diag2);
+                possibleMoves.push(diag2);
             }
         }
 
-        function checkEnemyFront(piece, front) {
+        function checkEnemyFront(front) {
             if (!front.piece) {
-                possiblesMoves.push(front);
+                possibleMoves.push(front);
             }
         }
-        return possiblesMoves.filter((value) => value !== undefined);
+        return possibleMoves.filter((value) => value !== undefined);
 
     }
 }
@@ -120,42 +120,42 @@ export class Knight extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(knightPosition, squares) {
-        let possiblesMoves = [];
+        let possibleMoves = [];
         // knight can move 1 square ahead 
         if (this.color === C.WHITE_PIECE) {
             if (knightPosition[1] < 8) {
-                possiblesMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] + 1))])
+                possibleMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] + 1))])
                 // can capture one square in diagonal
                 if (0 < knightPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (knightPosition[0] - 1) + (knightPosition[1] + 1))])
-                    possiblesMoves.push(squares[parseInt("" + (knightPosition[0] + 1) + (knightPosition[1] + 1))])
+                    possibleMoves.push(squares[parseInt("" + (knightPosition[0] - 1) + (knightPosition[1] + 1))])
+                    possibleMoves.push(squares[parseInt("" + (knightPosition[0] + 1) + (knightPosition[1] + 1))])
                 }
             }
             // but can move 2 if it's the first time is moving
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] + 2))])
+                possibleMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] + 2))])
             }
         } else if (this.color === C.BLACK_PIECE) {
             if (knightPosition[1] > 0) {
-                possiblesMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] - 1))])
+                possibleMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] - 1))])
                 if (0 < knightPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (knightPosition[0] - 1) + (knightPosition[1] - 1))])
-                    possiblesMoves.push(squares[parseInt("" + (knightPosition[0] + 1) + (knightPosition[1] - 1))])
+                    possibleMoves.push(squares[parseInt("" + (knightPosition[0] - 1) + (knightPosition[1] - 1))])
+                    possibleMoves.push(squares[parseInt("" + (knightPosition[0] + 1) + (knightPosition[1] - 1))])
                 }
             }
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] - 2))])
+                possibleMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] - 2))])
             }
         }
         // en passant stuff
 
-        return possiblesMoves;
+        return possibleMoves;
     }
 }
 
 export class Bishop extends Piece {
     static value = 3;
-
+    static type = C.BISHOP;
     constructor(color) {
         super(color);
         this.hasMoved = false;
@@ -168,36 +168,61 @@ export class Bishop extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(bishopPosition, squares) {
-        let possiblesMoves = [];
-        // bishop can move 1 square ahead 
-        if (this.color === C.WHITE_PIECE) {
-            if (bishopPosition[1] < 8) {
-                possiblesMoves.push(squares[parseInt("" + bishopPosition[0] + (bishopPosition[1] + 1))])
-                // can capture one square in diagonal
-                if (0 < bishopPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (bishopPosition[0] - 1) + (bishopPosition[1] + 1))])
-                    possiblesMoves.push(squares[parseInt("" + (bishopPosition[0] + 1) + (bishopPosition[1] + 1))])
-                }
-            }
-            // but can move 2 if it's the first time is moving
-            if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + bishopPosition[0] + (bishopPosition[1] + 2))])
-            }
-        } else if (this.color === C.BLACK_PIECE) {
-            if (bishopPosition[1] > 0) {
-                possiblesMoves.push(squares[parseInt("" + bishopPosition[0] + (bishopPosition[1] - 1))])
-                if (0 < bishopPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (bishopPosition[0] - 1) + (bishopPosition[1] - 1))])
-                    possiblesMoves.push(squares[parseInt("" + (bishopPosition[0] + 1) + (bishopPosition[1] - 1))])
-                }
-            }
-            if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + bishopPosition[0] + (bishopPosition[1] - 2))])
+
+        const possibleMoves = [];
+
+        const [col, row] = bishopPosition;
+
+        // up right squares
+        for (let c = col + 1, r = row + 1; c <= 8 && r <= 8; c++, r++) {
+            // there is opponent piece, we can't move further
+            if (checkObstacle(this, squares[parseInt(`${c}${r}`, 10)])) {
+                break;
             }
         }
-        // en passant stuff
 
-        return possiblesMoves;
+        // up left squares 
+        for (let c = col - 1, r = row + 1; c > 0 && r <= 8; c--, r++) {
+            if (checkObstacle(this, squares[parseInt(`${c}${r}`, 10)])) {
+                break;
+            }
+        }
+
+        // down right squares 
+        for (let c = col + 1, r = row - 1; c <= 8 && r > 0; c++, r--) {
+            if (checkObstacle(this, squares[parseInt(`${c}${r}`, 10)])) {
+                break;
+            }
+        }
+
+        // down left squares 
+        for (let c = col - 1, r = row - 1; c > 0 && r > 0; c--, r--) {
+            console.log(checkObstacle(this, squares[parseInt(`${c}${r}`, 10)]))
+            if (checkObstacle(this, squares[parseInt(`${c}${r}`, 10)])) {
+                break;
+            }
+        }
+
+        /**
+         * 
+         * @param {Bishop} piece 
+         * @param {T.Square} obs 
+         * @returns {boolean} decide if there is opponent piece so we can't move further
+         */
+        function checkObstacle(piece, obs) {
+            if (obs.piece) {
+                if (obs.piece.color !== piece.color) {
+                    possibleMoves.push(obs);
+                }
+                return true;
+            }
+            possibleMoves.push(obs)
+            // we cannot move to a square occupied by our own piece
+            return false;
+        }
+
+        return possibleMoves.filter((value) => value !== undefined);
+
     }
 }
 
@@ -216,36 +241,36 @@ export class Rook extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(rookPosition, squares) {
-        let possiblesMoves = [];
+        let possibleMoves = [];
         // rook can move 1 square ahead 
         if (this.color === C.WHITE_PIECE) {
             if (rookPosition[1] < 8) {
-                possiblesMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] + 1))])
+                possibleMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] + 1))])
                 // can capture one square in diagonal
                 if (0 < rookPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (rookPosition[0] - 1) + (rookPosition[1] + 1))])
-                    possiblesMoves.push(squares[parseInt("" + (rookPosition[0] + 1) + (rookPosition[1] + 1))])
+                    possibleMoves.push(squares[parseInt("" + (rookPosition[0] - 1) + (rookPosition[1] + 1))])
+                    possibleMoves.push(squares[parseInt("" + (rookPosition[0] + 1) + (rookPosition[1] + 1))])
                 }
             }
             // but can move 2 if it's the first time is moving
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] + 2))])
+                possibleMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] + 2))])
             }
         } else if (this.color === C.BLACK_PIECE) {
             if (rookPosition[1] > 0) {
-                possiblesMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] - 1))])
+                possibleMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] - 1))])
                 if (0 < rookPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (rookPosition[0] - 1) + (rookPosition[1] - 1))])
-                    possiblesMoves.push(squares[parseInt("" + (rookPosition[0] + 1) + (rookPosition[1] - 1))])
+                    possibleMoves.push(squares[parseInt("" + (rookPosition[0] - 1) + (rookPosition[1] - 1))])
+                    possibleMoves.push(squares[parseInt("" + (rookPosition[0] + 1) + (rookPosition[1] - 1))])
                 }
             }
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] - 2))])
+                possibleMoves.push(squares[parseInt("" + rookPosition[0] + (rookPosition[1] - 2))])
             }
         }
         // en passant stuff
 
-        return possiblesMoves;
+        return possibleMoves;
     }
 }
 
@@ -264,36 +289,36 @@ export class Queen extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(queenPosition, squares) {
-        let possiblesMoves = [];
+        let possibleMoves = [];
         // queen can move 1 square ahead 
         if (this.color === C.WHITE_PIECE) {
             if (queenPosition[1] < 8) {
-                possiblesMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] + 1))])
+                possibleMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] + 1))])
                 // can capture one square in diagonal
                 if (0 < queenPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (queenPosition[0] - 1) + (queenPosition[1] + 1))])
-                    possiblesMoves.push(squares[parseInt("" + (queenPosition[0] + 1) + (queenPosition[1] + 1))])
+                    possibleMoves.push(squares[parseInt("" + (queenPosition[0] - 1) + (queenPosition[1] + 1))])
+                    possibleMoves.push(squares[parseInt("" + (queenPosition[0] + 1) + (queenPosition[1] + 1))])
                 }
             }
             // but can move 2 if it's the first time is moving
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] + 2))])
+                possibleMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] + 2))])
             }
         } else if (this.color === C.BLACK_PIECE) {
             if (queenPosition[1] > 0) {
-                possiblesMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] - 1))])
+                possibleMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] - 1))])
                 if (0 < queenPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (queenPosition[0] - 1) + (queenPosition[1] - 1))])
-                    possiblesMoves.push(squares[parseInt("" + (queenPosition[0] + 1) + (queenPosition[1] - 1))])
+                    possibleMoves.push(squares[parseInt("" + (queenPosition[0] - 1) + (queenPosition[1] - 1))])
+                    possibleMoves.push(squares[parseInt("" + (queenPosition[0] + 1) + (queenPosition[1] - 1))])
                 }
             }
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] - 2))])
+                possibleMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] - 2))])
             }
         }
         // en passant stuff
 
-        return possiblesMoves;
+        return possibleMoves;
     }
 }
 
@@ -312,35 +337,35 @@ export class King extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(kingPosition, squares) {
-        let possiblesMoves = [];
+        let possibleMoves = [];
         // king can move 1 square ahead 
         if (this.color === C.WHITE_PIECE) {
             if (kingPosition[1] < 8) {
-                possiblesMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] + 1))])
+                possibleMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] + 1))])
                 // can capture one square in diagonal
                 if (0 < kingPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (kingPosition[0] - 1) + (kingPosition[1] + 1))])
-                    possiblesMoves.push(squares[parseInt("" + (kingPosition[0] + 1) + (kingPosition[1] + 1))])
+                    possibleMoves.push(squares[parseInt("" + (kingPosition[0] - 1) + (kingPosition[1] + 1))])
+                    possibleMoves.push(squares[parseInt("" + (kingPosition[0] + 1) + (kingPosition[1] + 1))])
                 }
             }
             // but can move 2 if it's the first time is moving
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] + 2))])
+                possibleMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] + 2))])
             }
         } else if (this.color === C.BLACK_PIECE) {
             if (kingPosition[1] > 0) {
-                possiblesMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] - 1))])
+                possibleMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] - 1))])
                 if (0 < kingPosition[0] < 8) {
-                    possiblesMoves.push(squares[parseInt("" + (kingPosition[0] - 1) + (kingPosition[1] - 1))])
-                    possiblesMoves.push(squares[parseInt("" + (kingPosition[0] + 1) + (kingPosition[1] - 1))])
+                    possibleMoves.push(squares[parseInt("" + (kingPosition[0] - 1) + (kingPosition[1] - 1))])
+                    possibleMoves.push(squares[parseInt("" + (kingPosition[0] + 1) + (kingPosition[1] - 1))])
                 }
             }
             if (this.hasMoved !== true) {
-                possiblesMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] - 2))])
+                possibleMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] - 2))])
             }
         }
         // en passant stuff
 
-        return possiblesMoves;
+        return possibleMoves;
     }
 }
