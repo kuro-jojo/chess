@@ -43,6 +43,7 @@ export class Piece {
             return true;
         }
         this.possibleMoves.push(obs)
+
         // we cannot move to a square occupied by our own piece
         return false;
     }
@@ -215,6 +216,7 @@ export class Rook extends Piece {
 
     constructor(color) {
         super(color);
+        this.hasMoved = false;
     }
 
 
@@ -339,6 +341,8 @@ export class King extends Piece {
 
     constructor(color) {
         super(color);
+        this.inCkech = false;
+        this.hasMoved = false;
     }
 
     /**
@@ -379,6 +383,7 @@ export class King extends Piece {
 
         // left square
         if (col > 1) {
+
             this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)]);
         }
         // right square
@@ -386,6 +391,33 @@ export class King extends Piece {
             this.checkObstacle(squares[parseInt(`${col + 1}${row}`, 10)]);
         }
 
-        return this.possibleMoves.filter((value) => value !== undefined);
+        // castling
+        if (!this.hasMoved) {
+            // rooks position based on the king position
+            const rookPositions = [
+                squares[parseInt(`${1}${row}`, 10)],
+                squares[parseInt(`${8}${row}`, 10)],
+            ];
+            // short castle
+            if (rookPositions[1].piece !== null && rookPositions[1].piece.constructor.type === C.ROOK && !rookPositions[1].hasMoved) {
+                // check if the king can move to 2 squares to the right 
+                if (!this.checkObstacle(squares[parseInt(`${col + 1}${row}`, 10)])) {
+                    this.checkObstacle(squares[parseInt(`${col + 2}${row}`, 10)]);
+                }
+            }
+            // long castle
+            if (rookPositions[0] !== null && rookPositions[0].piece.constructor.type === C.ROOK && !rookPositions[0].hasMoved) {
+                // check if the king can move to 3 squares to the left and if the rook is still in place and has not moved
+                if (!this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)]) &&
+                    !this.checkObstacle(squares[parseInt(`${col - 2}${row}`, 10)])) {
+                    this.checkObstacle(squares[parseInt(`${col - 3}${row}`, 10)]);
+                }
+            }
+        }
+
+        return [... new Set(this.possibleMoves.filter((value) => value !== undefined))];
     }
+
+
+
 }
