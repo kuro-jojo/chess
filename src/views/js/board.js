@@ -83,15 +83,17 @@ let squares = (function () {
             squares[parseInt(`${col}${rows[1]}`)].piece = new Pieces.Pawn(C.WHITE_PIECE);
             squares[parseInt(`${col}${rows[2]}`)].piece = new Pieces.Pawn(C.BLACK_PIECE);
         }
-
-        init_pieces(1, C.ROOK);
+        // 1. White , 8. Black
+        init_pieces(1, C.ROOK); 
         init_pieces(8, C.ROOK);
         init_pieces(1, C.BISHOP);
         init_pieces(8, C.BISHOP);
         init_pieces(1, C.KNIGHT);
         init_pieces(8, C.KNIGHT);
         init_pieces(1, C.QUEEN);
+        init_pieces(8, C.QUEEN);
         init_pieces(1, C.KING);
+        init_pieces(8, C.KING);
 
         // init pieces
         function init_pieces(row, type) {
@@ -112,7 +114,7 @@ let squares = (function () {
                 case C.QUEEN:
                     squares[parseInt(`${4}${row}`)].piece = new Pieces.Queen(color);
                     break;
-                case C.QUEEN:
+                case C.KING:
                     squares[parseInt(`${5}${row}`)].piece = new Pieces.King(color);
                     break;
                 default:

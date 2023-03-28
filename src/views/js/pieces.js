@@ -322,10 +322,10 @@ export class Queen extends Piece {
 
 export class King extends Piece {
     static value = 100;
+    static type = C.KING;
 
     constructor(color) {
         super(color);
-        this.hasMoved = false;
     }
 
     /**
@@ -335,35 +335,44 @@ export class King extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(kingPosition, squares) {
-        let possibleMoves = [];
-        // king can move 1 square ahead 
-        if (this.color === C.WHITE_PIECE) {
-            if (kingPosition[1] < 8) {
-                possibleMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] + 1))])
-                // can capture one square in diagonal
-                if (0 < kingPosition[0] < 8) {
-                    possibleMoves.push(squares[parseInt("" + (kingPosition[0] - 1) + (kingPosition[1] + 1))])
-                    possibleMoves.push(squares[parseInt("" + (kingPosition[0] + 1) + (kingPosition[1] + 1))])
-                }
+        this.possibleMoves = [];
+
+        const [col, row] = kingPosition;
+        // up square
+        if (row < 8) {
+            this.checkObstacle(squares[parseInt(`${col}${row + 1}`, 10)]);
+            // up left square
+            if (col > 1) {
+                this.checkObstacle(squares[parseInt(`${col - 1}${row + 1}`, 10)]);
             }
-            // but can move 2 if it's the first time is moving
-            if (this.hasMoved !== true) {
-                possibleMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] + 2))])
-            }
-        } else if (this.color === C.BLACK_PIECE) {
-            if (kingPosition[1] > 0) {
-                possibleMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] - 1))])
-                if (0 < kingPosition[0] < 8) {
-                    possibleMoves.push(squares[parseInt("" + (kingPosition[0] - 1) + (kingPosition[1] - 1))])
-                    possibleMoves.push(squares[parseInt("" + (kingPosition[0] + 1) + (kingPosition[1] - 1))])
-                }
-            }
-            if (this.hasMoved !== true) {
-                possibleMoves.push(squares[parseInt("" + kingPosition[0] + (kingPosition[1] - 2))])
+            // up right square
+            if (col < 8) {
+                this.checkObstacle(squares[parseInt(`${col + 1}${row + 1}`, 10)]);
             }
         }
-        // en passant stuff
 
-        return possibleMoves;
+        // down square
+        if (row > 1) {
+            this.checkObstacle(squares[parseInt(`${col}${row - 1}`, 10)]);
+            // down left square
+            if (col > 1) {
+                this.checkObstacle(squares[parseInt(`${col - 1}${row - 1}`, 10)]);
+            }
+            // down right square
+            if (col < 8) {
+                this.checkObstacle(squares[parseInt(`${col + 1}${row - 1}`, 10)]);
+            }
+        }
+
+        // left square
+        if (col > 1) {
+            this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)]);
+        }
+        // right square
+        if (col < 8) {
+            this.checkObstacle(squares[parseInt(`${col + 1}${row}`, 10)]);
+        }
+
+        return this.possibleMoves.filter((value) => value !== undefined);
     }
 }
