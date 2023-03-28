@@ -109,7 +109,7 @@ let squares = (function () {
                     break;
                 case C.KNIGHT:
                     squares[parseInt(`${2}${row}`)].piece = new Pieces.Knight(color);
-                    squares[parseInt(`${7}${row}`)].piece = new Pieces.Rook(color);
+                    squares[parseInt(`${7}${row}`)].piece = new Pieces.Knight(color);
                     break;
                 case C.QUEEN:
                     squares[parseInt(`${4}${row}`)].piece = new Pieces.Queen(color);

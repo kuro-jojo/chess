@@ -31,7 +31,7 @@ export class Piece {
     }
 
     /**
-     * 
+     * Add a new move it is possible
      * @param {T.Square} obs 
      * @returns {boolean} decide if there is opponent piece so we can't move further
      */
@@ -128,10 +128,10 @@ export class Pawn extends Piece {
 
 export class Knight extends Piece {
     static value = 3;
+    static type = C.KNIGHT;
 
     constructor(color) {
         super(color);
-        this.hasMoved = false;
     }
 
     /**
@@ -141,36 +141,22 @@ export class Knight extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(knightPosition, squares) {
-        let possibleMoves = [];
-        // knight can move 1 square ahead 
-        if (this.color === C.WHITE_PIECE) {
-            if (knightPosition[1] < 8) {
-                possibleMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] + 1))])
-                // can capture one square in diagonal
-                if (0 < knightPosition[0] < 8) {
-                    possibleMoves.push(squares[parseInt("" + (knightPosition[0] - 1) + (knightPosition[1] + 1))])
-                    possibleMoves.push(squares[parseInt("" + (knightPosition[0] + 1) + (knightPosition[1] + 1))])
-                }
-            }
-            // but can move 2 if it's the first time is moving
-            if (this.hasMoved !== true) {
-                possibleMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] + 2))])
-            }
-        } else if (this.color === C.BLACK_PIECE) {
-            if (knightPosition[1] > 0) {
-                possibleMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] - 1))])
-                if (0 < knightPosition[0] < 8) {
-                    possibleMoves.push(squares[parseInt("" + (knightPosition[0] - 1) + (knightPosition[1] - 1))])
-                    possibleMoves.push(squares[parseInt("" + (knightPosition[0] + 1) + (knightPosition[1] - 1))])
-                }
-            }
-            if (this.hasMoved !== true) {
-                possibleMoves.push(squares[parseInt("" + knightPosition[0] + (knightPosition[1] - 2))])
-            }
-        }
-        // en passant stuff
+        this.possibleMoves = [];
+        // 8 possible moves for a knight: 2 up/down and 1 left/right, or 2 left/right and 1 up/down
+        const moves = [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]];
+        const [col, row] = knightPosition;
 
-        return possibleMoves;
+        for (let move of moves) {
+            const c = col + move[0];
+            const r = row + move[1];
+
+            // check if the move is within the board bounds
+            if (c < 1 || c > 8 || r < 1 || r > 8) {
+                continue;
+            }
+            this.checkObstacle(squares[parseInt(`${c}${r}`, 10)]);
+        }
+        return this.possibleMoves.filter((value) => value !== undefined);
     }
 }
 
