@@ -180,7 +180,6 @@ export class Bishop extends Piece {
 
         // up right squares
         for (let c = col + 1, r = row + 1; c <= 8 && r <= 8; c++, r++) {
-            // there is opponent piece, we can't move further
             if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
                 break;
             }
@@ -260,49 +259,77 @@ export class Rook extends Piece {
 
 export class Queen extends Piece {
     static value = 9;
+    static type = C.QUEEN;
 
     constructor(color) {
         super(color);
-        this.hasMoved = false;
     }
 
     /**
+     * Combination between bishop and rook moves
      * @param {[col, row]} queenPosition the current position (square) of the queen
      * @param {[T.Square]} squares the square position where to move the queen
      * 
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(queenPosition, squares) {
-        let possibleMoves = [];
-        // queen can move 1 square ahead 
-        if (this.color === C.WHITE_PIECE) {
-            if (queenPosition[1] < 8) {
-                possibleMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] + 1))])
-                // can capture one square in diagonal
-                if (0 < queenPosition[0] < 8) {
-                    possibleMoves.push(squares[parseInt("" + (queenPosition[0] - 1) + (queenPosition[1] + 1))])
-                    possibleMoves.push(squares[parseInt("" + (queenPosition[0] + 1) + (queenPosition[1] + 1))])
-                }
-            }
-            // but can move 2 if it's the first time is moving
-            if (this.hasMoved !== true) {
-                possibleMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] + 2))])
-            }
-        } else if (this.color === C.BLACK_PIECE) {
-            if (queenPosition[1] > 0) {
-                possibleMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] - 1))])
-                if (0 < queenPosition[0] < 8) {
-                    possibleMoves.push(squares[parseInt("" + (queenPosition[0] - 1) + (queenPosition[1] - 1))])
-                    possibleMoves.push(squares[parseInt("" + (queenPosition[0] + 1) + (queenPosition[1] - 1))])
-                }
-            }
-            if (this.hasMoved !== true) {
-                possibleMoves.push(squares[parseInt("" + queenPosition[0] + (queenPosition[1] - 2))])
+        this.possibleMoves = [];
+        const [col, row] = queenPosition;
+
+        // up right squares
+        for (let c = col + 1, r = row + 1; c <= 8 && r <= 8; c++, r++) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+                break;
             }
         }
-        // en passant stuff
 
-        return possibleMoves;
+        // up left squares 
+        for (let c = col - 1, r = row + 1; c > 0 && r <= 8; c--, r++) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+                break;
+            }
+        }
+
+        // down right squares 
+        for (let c = col + 1, r = row - 1; c <= 8 && r > 0; c++, r--) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+                break;
+            }
+        }
+
+        // down left squares 
+        for (let c = col - 1, r = row - 1; c > 0 && r > 0; c--, r--) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+                break;
+            }
+        }
+
+        // up squares
+        for (let r = row + 1; r <= 8; r++) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)])) {
+                break;
+            }
+        }
+        // down squares
+        for (let r = row - 1; r > 0; r--) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)])) {
+                break;
+            }
+        }
+        // left squares
+        for (let c = col - 1; c > 0; c--) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)])) {
+                break;
+            }
+        }
+        // left squares
+        for (let c = col + 1; c <= 8; c++) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)])) {
+                break;
+            }
+        }
+
+        return this.possibleMoves.filter((value) => value !== undefined);
     }
 }
 
