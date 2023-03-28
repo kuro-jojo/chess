@@ -3,6 +3,7 @@
 
 <head>
     <link rel="stylesheet" href="css/index.css" type="text/css" />
+    <!--socket.io-->
 </head>
 
 <body class="board-layout with-players with-evaluation theatre-mode" style="--modifiedBoardWidth: 740px;">
@@ -21,8 +22,7 @@
                     <div class="user-tagline-compact-theatre">
                         <div class="user-tagline-compact-row">
                             <!---->
-                            <a
-                                class="user-username-component user-username-link user-tagline-compact-username">Adversaire</a>
+                            <span id="oponent-id-display" class="user-username-component user-username-link user-tagline-compact-username">Adversaire</span>
                         </div>
                         <div class="user-tagline-compact-row">
                             <!---->
@@ -157,8 +157,7 @@
                     <div class="user-tagline-compact-theatre">
                         <div class="user-tagline-compact-row">
                             <!---->
-                            <a
-                                class="user-username-component user-username-link user-tagline-compact-username">kuro_O8</a>
+                            <span id="player-id" class="user-username-component user-username-link user-tagline-compact-username">kuro_O8</span>
                         </div>
                     </div>
                     <!---->
@@ -185,15 +184,23 @@
                             class="selector-button-label">1 | 1</span> <span
                             class="icon-font-chess selector-button-chevron chevron-bottom"></span></button> <!---->
                     <!---->
-                </div> <button type="button"
-                    class="ui_v5-button-component ui_v5-button-primary ui_v5-button-large ui_v5-button-full"
-                    data-cy="focus-mode-play">
-                    Jouer
-                </button>
+                </div> 
+                <div>
+                    <input type="text" placeholder="Entrez id adversaire" id="oponent-id" class="ui_v5-button-component ui_v5-button-primary ui_v5-button-full input"/>
+                </div>
+                <div>
+                    <button type="button"
+                        id="play-button"
+                        class="ui_v5-button-component ui_v5-button-primary ui_v5-button-large ui_v5-button-full"
+                        data-cy="focus-mode-play">
+                        Jouer
+                    </button>
+                </div>
             </div> <!----> <!----> <!---->
         </div>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script src="js/board.js" type="module">
     </script>
 </body>

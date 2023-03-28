@@ -4,17 +4,38 @@ import * as T from "./types.js";
 // import { Piece } from "./types.js";
 
 // get the chess board and pieces from the DOM
+
+    // socket.io
+const socket = io('ws://localhost:3000');
+const play = document.getElementById("play-button");
+
 const board = document.getElementById("board-single");
 const gridOverlay = document.getElementById("grid-overlay");
 const pieces = document.querySelectorAll(".piece");
 const selectedPieceSquareColor = "rgba(165, 126, 53, 0.7)";
 const previousSquareColor = "rgba(165, 126, 53, 0.5)";
 
-
 const capturedPieces = new Map();
 
 // First player is white
 let currentPlayer = C.WHITE_PIECE;
+
+// Player's id
+let myId;
+let playerId= document.getElementById("player-id");
+// get the playerId
+
+// Oponent's id
+let oponentId= "";
+
+(function generateId(){
+    // generee
+    myId= makeid(7);
+    playerId.innerHTML = myId;
+})();
+
+// color of the player
+let currentIdColor=C.WHITE_PIECE;
 let playerMadeCapture = false;
 // track the currently selected piece
 /**
@@ -69,7 +90,7 @@ let squares = (function () {
             squareDiv.addEventListener("click", (event) => {
                 if (selectedPiece) {
                     // move the piece
-                    selectedPiece = movePiece(selectedPiece, square);
+                    selectedPiece = movePiece(selectedPiece, square, false);
                 }
             });
             squares[parseInt("" + col + row)] = square;
@@ -127,54 +148,130 @@ let squares = (function () {
     return squares;
 })();
 
+// add event listener to play button
+play.addEventListener("click", () => {
+    if (document.getElementById("oponent-id").value!=""){
+        initiateGame(document.getElementById("oponent-id").value);
+    }
+});
+
 // add event listeners to each chess piece
 pieces.forEach((piece) => {
     piece.addEventListener("click", () => {
 
-        // set the starting position of the piece
-        piece.style.position = "absolute";
-        piece.style.left = "0";
-        piece.style.top = "0";
+        if(oponentId!=""){
+            // set the starting position of the piece
+            piece.style.position = "absolute";
+            piece.style.left = "0";
+            piece.style.top = "0";
 
-        // hide the availabeles moves when another piece is selected 
-        if (selectedPiece) {
-            const sq = getAvailableMoves(selectedPiece, false);
-            let p = [];
-            const tmp_piece = createPieceObjectByHtmlElement(piece);
+            // hide the availabeles moves when another piece is selected 
+            if (selectedPiece) {
+                const sq = getAvailableMoves(selectedPiece, false);
+                let p = [];
+                const tmp_piece = createPieceObjectByHtmlElement(piece);
 
-            sq.forEach(s => {
-                // if in the square there is the piece we select now we move the selected piece into that square
-                if (s && s === tmp_piece.position) {
-                    playerMadeCapture = true;
-                    movePiece(selectedPiece, s, true);
-                    return
-                }
-            });
-            // if it is player turn and he already selected a piece then if he tried to select another capturable piece we capture it
+                sq.forEach(s => {
+                    // if in the square there is the piece we select now we move the selected piece into that square
+                    if (s && s === tmp_piece.position) {
+                        playerMadeCapture = true;
+                        movePiece(selectedPiece, s, true);
+                        return
+                    }
+                });
+                // if it is player turn and he already selected a piece then if he tried to select another capturable piece we capture it
 
-        }
-        if (playerMadeCapture) {
-            playerMadeCapture = false;
-            return;
-        }
-        if (selectedPiece && selectedPiece.element === piece) {
-            piece.style.backgroundColor = "";
-            selectedPiece = null;
-
-        } else if (selectedPiece == null || selectedPiece.element !== piece) {
-
-            // store the current position of the piece
-            if (selectedPiece !== null && selectedPiece.element !== piece) {
-                selectedPiece.element.style.backgroundColor = "";
-                // when we captured a piece the square is auto selected so we avoid that
-                getAvailableMoves(selectedPiece, false);
             }
-            selectedPiece = createPieceObjectByHtmlElement(piece);
-            piece.style.backgroundColor = selectedPieceSquareColor;
+            if (playerMadeCapture) {
+                playerMadeCapture = false;
+                return;
+            }
+            if (selectedPiece && selectedPiece.element === piece) {
+                piece.style.backgroundColor = "";
+                selectedPiece = null;
+
+            } else if (selectedPiece == null || selectedPiece.element !== piece) {
+
+                // store the current position of the piece
+                if (selectedPiece !== null && selectedPiece.element !== piece) {
+                    selectedPiece.element.style.backgroundColor = "";
+                    // when we captured a piece the square is auto selected so we avoid that
+                    getAvailableMoves(selectedPiece, false);
+                }
+                selectedPiece = createPieceObjectByHtmlElement(piece);
+                piece.style.backgroundColor = selectedPieceSquareColor;
+            }
+            getAvailableMoves(selectedPiece);
         }
-        getAvailableMoves(selectedPiece);
     });
 });
+
+//Accepts a game started by an oponent
+socket.on('gameStart', gameStart => {
+    if (gameStart[1] == myId){
+        console.log('Accepting game ...');
+        socket.emit('gameAccepted', gameStart);
+        oponentId= gameStart[0];
+        currentIdColor= C.BLACK_PIECE;
+    }
+});
+
+//Starts a game accepted by an oponent
+socket.on('gameAccepted', gameAccepted => {
+    
+    if (gameAccepted[0] == myId){
+        console.log('Starting game ...');
+        oponentId= gameAccepted[1];
+        document.getElementById("oponent-id-display").innerHTML= oponentId;
+        currentIdColor= C.WHITE_PIECE;
+    }
+});
+
+socket.on('squares', function(squrs) {
+    if (squrs[3] != myId){
+        console.log('Receiving move ...');
+        squrs[0].element= document.getElementsByClassName(JSON.parse(squrs[4]).className)[0];
+
+        let pc= JSON.parse(squrs[6]);
+        squrs[0]= createPieceObjectByHtmlElement(squrs[0].element)
+        // switch(squrs[0].type){
+        //     case C.PAWN:
+        //         squrs[0].object= new Pieces.Pawn(pc["color"], JSON.parse(pc["possibleMoves"]));
+        //         break;
+        //     case C.KING:
+        //         squrs[0].object= new Pieces.King(pc["color"], JSON.parse(pc["possibleMoves"]));
+        //         break;
+        //     case C.KNIGHT:
+        //         squrs[0].object= new Pieces.Knight(pc["color"], JSON.parse(pc["possibleMoves"]));
+        //         break;
+        //     case C.QUEEN:
+        //         squrs[0].object= new Pieces.Queen(pc["color"], JSON.parse(pc["possibleMoves"]));
+        //         break;
+        //     case C.ROOK:
+        //         squrs[0].object= new Pieces.Rook(pc["color"], JSON.parse(pc["possibleMoves"]));
+        //         break;
+        //     case C.BISHOP:
+        //         squrs[0].object= new Pieces.Bishop(pc["color"], JSON.parse(pc["possibleMoves"]));
+        //         break;
+        // }
+
+        pc= JSON.parse(squrs[5]);
+        // squrs[1].piece= new Pieces.Piece(pc["color"], JSON.parse(pc["possibleMoves"]) );
+        squrs[1].div = squares[""+squrs[1].col+squrs[1].row].div;
+        movePiece(squrs[0], squrs[1], false, false);
+    }
+});
+
+/**
+ * Initiates a new game against the specified oponent
+ * @param {String} oponentId - The id of the oponent
+ * @returns {void}
+ */
+function initiateGame(oponentId) {
+    console.log('Initiating game ...')
+    socket.emit('gameStart', [myId, oponentId]);
+}
+
 
 /**
  * 
@@ -194,15 +291,17 @@ function createPieceObjectByHtmlElement(piece) {
  *
  * @param {T.Piece} selectedPiece
  * @param {T.Square} squareToMove the square where to move the piece
- * @param {boolean} toCapurePiece if or not the move is aim to capture a piece
- * @returns {T.Piece|null} 
+ * @param {boolean} toCapturePiece if or not the move is aim to capture a piece
+ * @returns {T.Piece|null}
  */
-function movePiece(selectedPiece, squareToMove, toCapurePiece = false) {
+function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=true) {
+    const selP= {...selectedPiece};
+    const sqtm= {...squareToMove};
+    const tcp= {...toCapturePiece};
     // if it is not the turn of the right player he cannot move the piece
     if (currentPlayer !== selectedPiece.color) {
         return selectedPiece;
     }
-
     // reset the color of the previous move
     if (previousMovedSquare) {
         previousMovedSquare.style.backgroundColor = "";
@@ -212,11 +311,21 @@ function movePiece(selectedPiece, squareToMove, toCapurePiece = false) {
     }
     // the square where to move might be a valid one
 
-    if (!getAvailableMoves(selectedPiece, false).includes(squareToMove)) {
+    let incl= false;
+    getAvailableMoves(selectedPiece, false, noskip).forEach(move => {
+        if (move.col === squareToMove.col && move.row === squareToMove.row){
+            incl = true;
+            return;
+        }
+    });
+
+    if (!incl) {
         selectedPiece.element.style.backgroundColor = "";
         return null;
     }
-    const piece_tmp = selectedPiece.element.cloneNode(true);
+
+    const pieceSave = selectedPiece.element.cloneNode(true);
+
     const piece = selectedPiece.element;
     const squarePositionClassName = /square-\d+/;
     const squareNewPostionClassName = `square-${squareToMove.col}${squareToMove.row}`;
@@ -278,7 +387,7 @@ function movePiece(selectedPiece, squareToMove, toCapurePiece = false) {
         squareNewPostionClassName
     );
 
-    if (toCapurePiece) {
+    if (toCapturePiece) {
         // save the piece captured with the num of move as key
         // capturedPieces.set(squareToMove.piece, )
         // remove the captured piece from the board
@@ -301,7 +410,41 @@ function movePiece(selectedPiece, squareToMove, toCapurePiece = false) {
 
     // if it's a pawn make sure not to have the possibility to move up 2 squares
     squareToMove.piece = selectedPiece.object;
-    if (selectedPiece.type === C.PAWN || selectedPiece.type === C.KING || selectedPiece.type === C.ROOK) {
+    
+    if(noskip){
+
+        const elementData = {
+        id: pieceSave.id,
+        className: pieceSave.className,
+        textContent: pieceSave.textContent,
+        style: {
+            backgroundColor: pieceSave.style.backgroundColor,
+        }
+        // Add other properties as needed
+        };
+
+        const elementJson = JSON.stringify(elementData);
+
+        const pieceJ = {
+            color: squareToMove.piece.color,
+            possibleMoves: JSON.stringify(squareToMove.piece.possibleMoves),
+            // Add other properties as needed
+        };
+        
+        const pieceJSON = JSON.stringify(pieceJ);
+
+        const pieceJ2 = {
+            color: selectedPiece.object.color,
+            possibleMoves: JSON.stringify(selectedPiece.object.possibleMoves),
+            // Add other properties as needed
+        };
+        
+        const pieceJSON2 = JSON.stringify(pieceJ2);
+
+        socket.emit('squares', [selP, sqtm, tcp, myId, elementJson, pieceJSON, pieceJSON2]);
+    }
+
+if (selectedPiece.type === C.PAWN || selectedPiece.type === C.KING || selectedPiece.type === C.ROOK) {
         squareToMove.piece.hasMoved = true;
     }
 
@@ -372,11 +515,13 @@ function getPiecePositionSquare(piece) {
  * 
  * @returns {T.Square[]} list of all available squares to move
  */
-function getAvailableMoves(selectedPiece, toDisplay = true) {
+function getAvailableMoves(selectedPiece, toDisplay = true, noskip=true) {
+
     if (!selectedPiece) {
         return;
     }
-    if (selectedPiece.color === currentPlayer) {
+    
+    if ( (selectedPiece.color === currentPlayer && currentIdColor === selectedPiece.color)  || (selectedPiece.color === currentPlayer && !noskip )  ) {
         const position = [selectedPiece.position.col, selectedPiece.position.row]
         /**
          * @type {T.Square[]}
@@ -419,4 +564,16 @@ function displayAvailableMoves(moves, toDisplay) {
 
         }
     });
+}
+
+function makeid(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
 }
