@@ -9,16 +9,27 @@ const io = require('socket.io')(server, {
 app.use(express.static('src/views'));
 
 
-
+app.get('/socket.io',(req,res) => {
+  req.headers['access-control-allow-origin']= 'htttp://192.168.196.124:3000'
+});
 
 
 io.on('connection', (socket) => {
-    console.log('A new user connected');
+  console.log('A new user connected');
 
-    socket.on('newMove', (newMove) =>{
-        console.log(newMove);
-        io.emit('newMove', '${newMove}');
-    });
+  socket.on('gameStart', gameStart => {
+    console.log('Broadcoast Initialising game');
+    io.emit('gameStart', gameStart);
+  });
+  socket.on('gameAccepted', gameAccepted => {
+    console.log('Broadcoast Accepting game');
+    io.emit('gameAccepted', gameAccepted);
+  });
+  socket.on('squares', squrs => {
+    console.log('Broadcoast Moving piece');
+    io.emit('squares', squrs);
+  });
+
 });
 
 server.listen(3000, ()=> console.log('listening on http://localhost:3000'));
