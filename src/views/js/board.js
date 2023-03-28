@@ -5,7 +5,7 @@ import * as T from "./types.js";
 
 // get the chess board and pieces from the DOM
 
-    // socket.io
+// socket.io
 const socket = io('ws://localhost:3000');
 const play = document.getElementById("play-button");
 
@@ -22,20 +22,20 @@ let currentPlayer = C.WHITE_PIECE;
 
 // Player's id
 let myId;
-let playerId= document.getElementById("player-id");
+let playerId = document.getElementById("player-id");
 // get the playerId
 
 // Oponent's id
-let oponentId= "";
+let oponentId = "";
 
-(function generateId(){
+(function generateId() {
     // generee
-    myId= makeid(7);
+    myId = makeid(7);
     playerId.innerHTML = myId;
 })();
 
 // color of the player
-let currentIdColor=C.WHITE_PIECE;
+let currentIdColor = C.WHITE_PIECE;
 let playerMadeCapture = false;
 // track the currently selected piece
 /**
@@ -150,7 +150,7 @@ let squares = (function () {
 
 // add event listener to play button
 play.addEventListener("click", () => {
-    if (document.getElementById("oponent-id").value!=""){
+    if (document.getElementById("oponent-id").value != "") {
         initiateGame(document.getElementById("oponent-id").value);
     }
 });
@@ -159,7 +159,7 @@ play.addEventListener("click", () => {
 pieces.forEach((piece) => {
     piece.addEventListener("click", () => {
 
-        if(oponentId!=""){
+        if (oponentId != "") {
             // set the starting position of the piece
             piece.style.position = "absolute";
             piece.style.left = "0";
@@ -208,57 +208,60 @@ pieces.forEach((piece) => {
 
 //Accepts a game started by an oponent
 socket.on('gameStart', gameStart => {
-    if (gameStart[1] == myId){
+    if (gameStart[1] == myId) {
         console.log('Accepting game ...');
         socket.emit('gameAccepted', gameStart);
-        oponentId= gameStart[0];
-        currentIdColor= C.BLACK_PIECE;
+        oponentId = gameStart[0];
+        currentIdColor = C.BLACK_PIECE;
     }
 });
 
 //Starts a game accepted by an oponent
 socket.on('gameAccepted', gameAccepted => {
-    
-    if (gameAccepted[0] == myId){
+
+    if (gameAccepted[0] == myId) {
         console.log('Starting game ...');
-        oponentId= gameAccepted[1];
-        document.getElementById("oponent-id-display").innerHTML= oponentId;
-        currentIdColor= C.WHITE_PIECE;
+        oponentId = gameAccepted[1];
+        document.getElementById("oponent-id-display").innerHTML = oponentId;
+        currentIdColor = C.WHITE_PIECE;
     }
 });
 
-socket.on('squares', function(squrs) {
-    if (squrs[3] != myId){
+socket.on('squares', function (squrs) {
+    if (squrs[3] != myId) {
         console.log('Receiving move ...');
-        squrs[0].element= document.getElementsByClassName(JSON.parse(squrs[4]).className)[0];
+        squrs[0].element = document.getElementsByClassName(JSON.parse(squrs[4]).className)[0];
 
-        let pc= JSON.parse(squrs[6]);
-        squrs[0]= createPieceObjectByHtmlElement(squrs[0].element)
-        // switch(squrs[0].type){
-        //     case C.PAWN:
-        //         squrs[0].object= new Pieces.Pawn(pc["color"], JSON.parse(pc["possibleMoves"]));
-        //         break;
-        //     case C.KING:
-        //         squrs[0].object= new Pieces.King(pc["color"], JSON.parse(pc["possibleMoves"]));
-        //         break;
-        //     case C.KNIGHT:
-        //         squrs[0].object= new Pieces.Knight(pc["color"], JSON.parse(pc["possibleMoves"]));
-        //         break;
-        //     case C.QUEEN:
-        //         squrs[0].object= new Pieces.Queen(pc["color"], JSON.parse(pc["possibleMoves"]));
-        //         break;
-        //     case C.ROOK:
-        //         squrs[0].object= new Pieces.Rook(pc["color"], JSON.parse(pc["possibleMoves"]));
-        //         break;
-        //     case C.BISHOP:
-        //         squrs[0].object= new Pieces.Bishop(pc["color"], JSON.parse(pc["possibleMoves"]));
-        //         break;
-        // }
+        squrs[0] = createPieceObjectByHtmlElement(squrs[0].element)
 
-        pc= JSON.parse(squrs[5]);
-        // squrs[1].piece= new Pieces.Piece(pc["color"], JSON.parse(pc["possibleMoves"]) );
-        squrs[1].div = squares[""+squrs[1].col+squrs[1].row].div;
-        movePiece(squrs[0], squrs[1], false, false);
+        const pc = JSON.parse(squrs[5]);
+        squrs[1].piece = new Pieces.Piece(pc["color"], JSON.parse(pc["possibleMoves"]));
+        switch (pc.type) {
+            case C.PAWN:
+                squrs[1].piece = new Pieces.Pawn(pc["color"], JSON.parse(pc["possibleMoves"]));
+                break;
+            case C.KNIGHT:
+                squrs[1].piece = new Pieces.Knight(pc["color"], JSON.parse(pc["possibleMoves"]));
+                break;
+            case C.BISHOP:
+                squrs[1].piece = new Pieces.Bishop(pc["color"], JSON.parse(pc["possibleMoves"]));
+                break;
+            case C.ROOK:
+                squrs[1].piece = new Pieces.Rook(pc["color"], JSON.parse(pc["possibleMoves"]));
+                break;
+            case C.QUEEN:
+                squrs[1].piece = new Pieces.Queen(pc["color"], JSON.parse(pc["possibleMoves"]));
+                break;
+            case C.KING:
+                squrs[1].piece = new Pieces.King(pc["color"], JSON.parse(pc["possibleMoves"]));
+                break;
+            default:
+                break;
+        }
+
+        squrs[1].div = squares["" + squrs[1].col + squrs[1].row].div;
+        console.log(squrs[0], squrs[1]);
+        movePiece(squrs[0], squrs[1], squrs[2], false);
     }
 });
 
@@ -294,10 +297,11 @@ function createPieceObjectByHtmlElement(piece) {
  * @param {boolean} toCapturePiece if or not the move is aim to capture a piece
  * @returns {T.Piece|null}
  */
-function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=true) {
-    const selP= {...selectedPiece};
-    const sqtm= {...squareToMove};
-    const tcp= {...toCapturePiece};
+function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip = true) {
+    const selP = { ...selectedPiece };
+    const sqtm = { ...squareToMove };
+    // console.log(squareToMove.piece, selectedPiece.object)
+
     // if it is not the turn of the right player he cannot move the piece
     if (currentPlayer !== selectedPiece.color) {
         return selectedPiece;
@@ -311,9 +315,9 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
     }
     // the square where to move might be a valid one
 
-    let incl= false;
+    let incl = false;
     getAvailableMoves(selectedPiece, false, noskip).forEach(move => {
-        if (move.col === squareToMove.col && move.row === squareToMove.row){
+        if (move.col === squareToMove.col && move.row === squareToMove.row) {
             incl = true;
             return;
         }
@@ -395,6 +399,8 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
             `${squareNewPostionClassName} 
             ${squareToMove.piece.color}${squareToMove.piece.constructor.type}`
         );
+        console.log("to capture piece " + elements);
+        console.log(squareToMove.piece, selectedPiece.object)
         elements[0].parentNode.removeChild(elements[0]);
     }
 
@@ -408,29 +414,31 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
     currentPlayer = currentPlayer === C.WHITE_PIECE ? C.BLACK_PIECE : C.WHITE_PIECE;
     // let sq = squares[squares.indexOf(squareToMove)] ;
 
-    // if it's a pawn make sure not to have the possibility to move up 2 squares
-    squareToMove.piece = selectedPiece.object;
-    
-    if(noskip){
+    if (noskip) {
 
         const elementData = {
-        id: pieceSave.id,
-        className: pieceSave.className,
-        textContent: pieceSave.textContent,
-        style: {
-            backgroundColor: pieceSave.style.backgroundColor,
-        }
-        // Add other properties as needed
+            id: pieceSave.id,
+            className: pieceSave.className,
+            textContent: pieceSave.textContent,
+            style: {
+                backgroundColor: pieceSave.style.backgroundColor,
+            }
+            // Add other properties as needed
         };
 
         const elementJson = JSON.stringify(elementData);
 
-        const pieceJ = {
-            color: squareToMove.piece.color,
-            possibleMoves: JSON.stringify(squareToMove.piece.possibleMoves),
-            // Add other properties as needed
-        };
-        
+        const pieceJ = {};
+        if (squareToMove.piece) {
+            pieceJ.color = squareToMove.piece.color;
+            pieceJ.possibleMoves = JSON.stringify(squareToMove.piece.possibleMoves);
+            pieceJ.type = squareToMove.piece.constructor.type;
+        } else {
+            pieceJ.color = "";
+            pieceJ.possibleMoves = JSON.stringify([]);
+            pieceJ.type = "";
+        }
+
         const pieceJSON = JSON.stringify(pieceJ);
 
         const pieceJ2 = {
@@ -438,20 +446,24 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip=t
             possibleMoves: JSON.stringify(selectedPiece.object.possibleMoves),
             // Add other properties as needed
         };
-        
+
         const pieceJSON2 = JSON.stringify(pieceJ2);
 
-        socket.emit('squares', [selP, sqtm, tcp, myId, elementJson, pieceJSON, pieceJSON2]);
+        socket.emit('squares', [selP, sqtm, toCapturePiece, myId, elementJson, pieceJSON, pieceJSON2]);
     }
 
-if (selectedPiece.type === C.PAWN || selectedPiece.type === C.KING || selectedPiece.type === C.ROOK) {
+    // if it's a pawn make sure not to have the possibility to move up 2 squares
+    squareToMove.piece = selectedPiece.object;
+
+
+    if (selectedPiece.type === C.PAWN || selectedPiece.type === C.KING || selectedPiece.type === C.ROOK) {
         squareToMove.piece.hasMoved = true;
     }
 
     // update the square where the piece is moved
     squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = squareToMove.piece;
     squares[parseInt(currentPosition)].piece = null;
-    
+
     return null;
 }
 
@@ -515,13 +527,13 @@ function getPiecePositionSquare(piece) {
  * 
  * @returns {T.Square[]} list of all available squares to move
  */
-function getAvailableMoves(selectedPiece, toDisplay = true, noskip=true) {
+function getAvailableMoves(selectedPiece, toDisplay = true, noskip = true) {
 
     if (!selectedPiece) {
         return;
     }
-    
-    if ( (selectedPiece.color === currentPlayer && currentIdColor === selectedPiece.color)  || (selectedPiece.color === currentPlayer && !noskip )  ) {
+
+    if ((selectedPiece.color === currentPlayer && currentIdColor === selectedPiece.color) || (selectedPiece.color === currentPlayer && !noskip)) {
         const position = [selectedPiece.position.col, selectedPiece.position.row]
         /**
          * @type {T.Square[]}
@@ -572,8 +584,8 @@ function makeid(length) {
     const charactersLength = characters.length;
     let counter = 0;
     while (counter < length) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-      counter += 1;
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
     }
     return result;
 }
