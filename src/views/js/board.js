@@ -260,7 +260,6 @@ socket.on('squares', function (squrs) {
         }
 
         squrs[1].div = squares["" + squrs[1].col + squrs[1].row].div;
-        console.log(squrs[0], squrs[1]);
         movePiece(squrs[0], squrs[1], squrs[2], false);
     }
 });
@@ -300,7 +299,6 @@ function createPieceObjectByHtmlElement(piece) {
 function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip = true) {
     const selP = { ...selectedPiece };
     const sqtm = { ...squareToMove };
-    // console.log(squareToMove.piece, selectedPiece.object)
 
     // if it is not the turn of the right player he cannot move the piece
     if (currentPlayer !== selectedPiece.color) {
@@ -399,8 +397,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
             `${squareNewPostionClassName} 
             ${squareToMove.piece.color}${squareToMove.piece.constructor.type}`
         );
-        console.log("to capture piece " + elements);
-        console.log(squareToMove.piece, selectedPiece.object)
         elements[0].parentNode.removeChild(elements[0]);
     }
 
@@ -450,6 +446,17 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
         const pieceJSON2 = JSON.stringify(pieceJ2);
 
         socket.emit('squares', [selP, sqtm, toCapturePiece, myId, elementJson, pieceJSON, pieceJSON2]);
+
+    } else {
+        // check if opponent king is in check
+        console.log("checking if king is in check");
+        const [isKingInCheck, kingPosition] = kingInCheck(C.BLACK_PIECE, squares);
+        if (isKingInCheck) {
+            console.log(currentPlayer + "king in check");
+            const king = squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)];
+            console.log(king)
+            return null;
+        }
     }
 
     // if it's a pawn make sure not to have the possibility to move up 2 squares
@@ -463,6 +470,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     // update the square where the piece is moved
     squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = squareToMove.piece;
     squares[parseInt(currentPosition)].piece = null;
+
 
     return null;
 }
@@ -588,4 +596,31 @@ function makeid(length) {
         counter += 1;
     }
     return result;
+}
+
+function kingInCheck(kingColor) {
+
+    const king = squares.find(square => {
+        return square && square.piece && square.piece.constructor.type === C.KING && square.piece.color === kingColor;
+    });
+
+    const kingPosition = [king.col, king.row];
+
+    const opponentPieces = squares.filter((square) => {
+        return square && square.piece && square.piece.color !== kingColor;
+    });
+
+    const opponentMoves = opponentPieces.map((square) => {
+        if (square)
+            return square.piece.getPossibleMoves([square.col, square.row], squares);
+        return [];
+    });
+
+    const opponentMovesFlatten = opponentMoves.reduce((acc, val) => acc.concat(val), []);
+
+    const isKingInCheck = opponentMovesFlatten.some((square) => {
+        return square.col === kingPosition[0] && square.row === kingPosition[1];
+    });
+
+    return [isKingInCheck, kingPosition];
 }
