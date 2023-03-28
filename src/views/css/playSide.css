@@ -90,3 +90,8 @@ a,
 button {
   cursor: pointer;
 }
+
+.input {
+  --fontSize: 0.8rem;
+  margin-bottom: 2.5%;
+}

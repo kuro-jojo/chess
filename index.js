@@ -1,13 +1,27 @@
 const express = require('express');
 const app = express();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server, {
+    cors: {origin:"*"}
+});
 
 // Serve static files from the "public" directory
 app.use(express.static('src/views'));
 
 
-const server = app.listen(3000, () => {
-  console.log('Server is listening on port 3000');
+
+
+
+io.on('connection', (socket) => {
+    console.log('A new user connected');
+
+    socket.on('newMove', (newMove) =>{
+        console.log(newMove);
+        io.emit('newMove', '${newMove}');
+    });
 });
+
+server.listen(3000, ()=> console.log('listening on http://localhost:3000'));
 
 // const connect = require('connect');
 // const serveStatic = require('serve-static');

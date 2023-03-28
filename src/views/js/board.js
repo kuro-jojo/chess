@@ -4,6 +4,11 @@ import * as T from "./types.js";
 // import { Piece } from "./types.js";
 
 // get the chess board and pieces from the DOM
+
+    // socket.io
+const socket = io('ws://localhost:3000');
+const play = document.getElementById("play-button");
+
 const board = document.getElementById("board-single");
 const gridOverlay = document.getElementById("grid-overlay");
 const pieces = document.querySelectorAll(".piece");
@@ -12,6 +17,9 @@ const previousSquareColor = "rgba(165, 126, 53, 0.5)";
 
 // First player is white
 let currentPlayer = C.WHITE_PIECE;
+
+// Player's id
+let myId= document.getElementById("my-id").value
 
 // track the currently selected piece
 /**
@@ -86,6 +94,14 @@ let squares = (function () {
     return squares;
 })();
 
+// add event listener to play button
+play.addEventListener("click", () => {
+    playerId= document.getElementById("oponent-id").value;
+    if (playerId!=""){
+        startGame();
+    }
+});
+
 // add event listeners to each chess piece
 pieces.forEach((piece) => {
     piece.addEventListener("click", () => {
@@ -123,10 +139,23 @@ pieces.forEach((piece) => {
 });
 
 /**
+ * Starts a new game against the specified oponent
+ * @param {String} oponentId - The id of the oponent
+ * @returns {void}
+ */
+function startGame(oponentId) {
+    socket.emit('gameStart', oponentId);
+}
+
+socket.on('gameStart', gameStart => {
+    if (gameStart == myId)
+});
+
+/**
  *
  * @param {T.Piece} selectedPiece
  * @param {T.Square} squareToMove the square where to move the piece
- * @returns {T.Piece|null} 
+ * @returns {T.Piece|null}
  */
 function movePiece(selectedPiece, squareToMove) {
     // if it is not the turn of the right player he cannot move the piece
