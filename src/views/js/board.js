@@ -25,8 +25,8 @@ let myId;
 let playerId = document.getElementById("player-id");
 // get the playerId
 
-// Oponent's id
-let oponentId = "";
+// Opponent's id
+let opponentId = "";
 
 (function generateId() {
     // generee
@@ -150,8 +150,8 @@ let squares = (function () {
 
 // add event listener to play button
 play.addEventListener("click", () => {
-    if (document.getElementById("oponent-id").value != "") {
-        initiateGame(document.getElementById("oponent-id").value);
+    if (document.getElementById("opponent-id").value != "") {
+        initiateGame(document.getElementById("opponent-id").value);
     }
 });
 
@@ -159,7 +159,7 @@ play.addEventListener("click", () => {
 pieces.forEach((piece) => {
     piece.addEventListener("click", () => {
 
-        if (oponentId != "") {
+        if (opponentId != "") {
             // set the starting position of the piece
             piece.style.position = "absolute";
             piece.style.left = "0";
@@ -206,23 +206,23 @@ pieces.forEach((piece) => {
     });
 });
 
-//Accepts a game started by an oponent
+//Accepts a game started by an opponent
 socket.on('gameStart', gameStart => {
     if (gameStart[1] == myId) {
         console.log('Accepting game ...');
         socket.emit('gameAccepted', gameStart);
-        oponentId = gameStart[0];
+        opponentId = gameStart[0];
         currentIdColor = C.BLACK_PIECE;
     }
 });
 
-//Starts a game accepted by an oponent
+//Starts a game accepted by an opponent
 socket.on('gameAccepted', gameAccepted => {
 
     if (gameAccepted[0] == myId) {
         console.log('Starting game ...');
-        oponentId = gameAccepted[1];
-        document.getElementById("oponent-id-display").innerHTML = oponentId;
+        opponentId = gameAccepted[1];
+        document.getElementById("opponent-id-display").innerHTML = opponentId;
         currentIdColor = C.WHITE_PIECE;
     }
 });
@@ -265,13 +265,13 @@ socket.on('squares', function (squrs) {
 });
 
 /**
- * Initiates a new game against the specified oponent
- * @param {String} oponentId - The id of the oponent
+ * Initiates a new game against the specified opponent
+ * @param {String} opponentId - The id of the opponent
  * @returns {void}
  */
-function initiateGame(oponentId) {
+function initiateGame(opponentId) {
     console.log('Initiating game ...')
-    socket.emit('gameStart', [myId, oponentId]);
+    socket.emit('gameStart', [myId, opponentId]);
 }
 
 
@@ -380,7 +380,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
             squares[parseInt(rookPosition.match(/\d{2}/)[0])].piece = null;
             // squares[parseInt(rookPosition.match(/\d{2}/)[0])].div.className = "square";
         }
-
     }
     // move the piece
 
@@ -447,18 +446,14 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
         socket.emit('squares', [selP, sqtm, toCapturePiece, myId, elementJson, pieceJSON, pieceJSON2]);
 
-    } else {
-        // check if opponent king is in check
-        console.log("checking if king is in check");
-        const [isKingInCheck, kingPosition] = kingInCheck(C.BLACK_PIECE, squares);
-        if (isKingInCheck) {
-            console.log(currentPlayer + "king in check");
-            const king = squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)];
-            console.log(king)
-            return null;
-        }
     }
+    // else {
+    //     // check if opponent king is in check
+    //     console.log("checking if king is in check");
 
+    // }
+
+    
     // if it's a pawn make sure not to have the possibility to move up 2 squares
     squareToMove.piece = selectedPiece.object;
 
@@ -471,7 +466,14 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = squareToMove.piece;
     squares[parseInt(currentPosition)].piece = null;
 
-
+    const [isKingInCheck, kingPosition] = kingInCheck(currentPlayer);
+    if (isKingInCheck) {
+        console.log(currentPlayer + "king in check");
+        const king = squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)];
+        king.div.style.backgroundColor = "green";
+        console.log(king)
+        return null;
+    }
     return null;
 }
 
@@ -621,6 +623,6 @@ function kingInCheck(kingColor) {
     const isKingInCheck = opponentMovesFlatten.some((square) => {
         return square.col === kingPosition[0] && square.row === kingPosition[1];
     });
-
+    console.log("isKingInCheck", kingColor)
     return [isKingInCheck, kingPosition];
 }
