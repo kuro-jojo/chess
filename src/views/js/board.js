@@ -165,7 +165,7 @@ pieces.forEach((piece) => {
             piece.style.left = "0";
             piece.style.top = "0";
 
-            // hide the availabeles moves when another piece is selected 
+            // hide the availables moves when another piece is selected 
             if (selectedPiece) {
                 const sq = getAvailableMoves(selectedPiece, false);
                 let p = [];
@@ -177,10 +177,12 @@ pieces.forEach((piece) => {
                     if (s && s === tmp_piece.position) {
                         playerMadeCapture = true;
                         console.log(i, s.piece);
-                        const pm = s.piece.possibleMoves;
-                        pm.forEach(p => {
-                            p.piece = null;
-                        });
+                        if (s.piece) {
+                            const pm = s.piece.possibleMoves;
+                            pm.forEach(p => {
+                                p.piece = null;
+                            });
+                        }
                         i = i + 1;
                         movePiece(selectedPiece, s, true);
                         return
@@ -205,9 +207,12 @@ pieces.forEach((piece) => {
                     // when we captured a piece the square is auto selected so we avoid that
                     getAvailableMoves(selectedPiece, false);
                 }
-                selectedPiece = createPieceObjectByHtmlElement(piece);
+                console.log(selectedPiece);
                 piece.style.backgroundColor = selectedPieceSquareColor;
+                selectedPiece = createPieceObjectByHtmlElement(piece);
             }
+            console.log(piece);
+
             getAvailableMoves(selectedPiece);
         }
     });
@@ -342,7 +347,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
     // if is the king
     if ((selectedPiece.type === C.KING && !selectedPiece.object.hasMoved) || (selectedPiece.type === C.KING && selectedPiece.object.hasMoved && !noskip)) {
-        console.log(squareToMove, selectedPiece);
 
         // if the square to move is for short castling
         let rook = null;
@@ -400,6 +404,8 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     );
 
     if (toCapturePiece) {
+        console.log(getAvailableMoves(selectedPiece, false, noskip));
+
         // save the piece captured with the num of move as key
         // capturedPieces.set(squareToMove.piece, )
         // remove the captured piece from the board
@@ -561,11 +567,13 @@ function getAvailableMoves(selectedPiece, toDisplay = true, noskip = true) {
          * @type {T.Square[]}
          */
         let moves = [];
+        console.log("fff", selectedPiece.position.piece)
         if (selectedPiece.position.piece) {
             moves = selectedPiece.position.piece.getPossibleMoves(position, squares);
         } else {
             moves = selectedPiece.object.getPossibleMoves(position, squares);
         }
+        console.log(moves)
         displayAvailableMoves(moves, toDisplay);
 
         return moves;

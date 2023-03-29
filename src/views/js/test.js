@@ -69,26 +69,34 @@ export class Pawn extends Piece {
         // pawn can move 1 square ahead 
         if (this.color === C.WHITE_PIECE) {
             if (pawnPosition[1] < 8) {
-                // checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1]))]);
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))]);
+                // but can move 2 if it's the first time is moving
+                if (this.hasMoved !== true) {
+                    if (checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))])) {
+                        checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))]);
+                    }
+                } else {
+                    // checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1]))]);
+                    checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))]);
+                }
                 // can capture one square in diagonal
                 if (0 < pawnPosition[0] < 8) {
                     // check if there is enemy on the diagonal
                     const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] + 1))];
                     const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] + 1))];
-
                     // console.log(diag1, diag2)
                     checkEnemyDiagonal(this, diag1, diag2);
                 }
             }
-            // but can move 2 if it's the first time is moving
-            if (this.hasMoved !== true) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))]);
-            }
+
         } else if (this.color === C.BLACK_PIECE) {
             if (pawnPosition[1] > 0) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))]);
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1]))]);
+                if (!this.hasMoved) {
+                    if (checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))])) {
+                        checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))])
+                    };
+                } else {
+                    checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))]);
+                }
                 if (0 < pawnPosition[0] < 8) {
                     const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] - 1))];
                     const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] - 1))];
@@ -96,9 +104,7 @@ export class Pawn extends Piece {
                     checkEnemyDiagonal(this, diag1, diag2);
                 }
             }
-            if (!this.hasMoved) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))]);
-            }
+
         }
         // en passant stuff
         /**
@@ -108,9 +114,13 @@ export class Pawn extends Piece {
          */
         function checkEnemyDiagonal(piece, diag1, diag2) {
             if (diag1 && diag1.piece && diag1.piece.color !== piece.color) {
+                diag1.piece.possibleMoves = []
+
                 piece.possibleMoves.push(diag1);
             }
             if (diag2 && diag2.piece && diag2.piece.color !== piece.color) {
+                diag2.piece.possibleMoves = []
+
                 piece.possibleMoves.push(diag2);
             }
         }
@@ -120,10 +130,13 @@ export class Pawn extends Piece {
          * @param {T.Square} front 
          */
         function checkEnemyFront(piece, front) {
-            console.log("fron",front)
+            console.log("fron", front, piece)
             if (front.piece === null) {
                 piece.possibleMoves.push(front);
+                return true;
             }
+            front.piece.possibleMoves = []
+            return false;
         }
         return this.possibleMoves.filter((value) => value !== undefined);
     }
