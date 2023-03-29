@@ -171,10 +171,17 @@ pieces.forEach((piece) => {
                 let p = [];
                 const tmp_piece = createPieceObjectByHtmlElement(piece);
 
+                let i=0;
                 sq.forEach(s => {
                     // if in the square there is the piece we select now we move the selected piece into that square
                     if (s && s === tmp_piece.position) {
                         playerMadeCapture = true;
+                        console.log(i, s.piece);
+                        const pm= s.piece.possibleMoves;
+                        pm.forEach(p =>{
+                            p.piece= null;
+                        });
+                        i= i+1;
                         movePiece(selectedPiece, s, true);
                         return
                     }
@@ -467,6 +474,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     squares[parseInt(currentPosition)].piece = null;
 
     const [isKingInCheck, kingPosition] = kingInCheck(currentPlayer);
+    //let isKingInCheck= false;
     if (isKingInCheck) {
         console.log(currentPlayer + "king in check");
         const king = squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)];
