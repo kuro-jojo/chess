@@ -30,7 +30,7 @@ let opponentId = "";
 
 (function generateId() {
     // generee
-    myId = makeid(7);
+    myId = makeid(4);
     playerId.innerHTML = myId;
 })();
 
@@ -171,17 +171,17 @@ pieces.forEach((piece) => {
                 let p = [];
                 const tmp_piece = createPieceObjectByHtmlElement(piece);
 
-                let i=0;
+                let i = 0;
                 sq.forEach(s => {
                     // if in the square there is the piece we select now we move the selected piece into that square
                     if (s && s === tmp_piece.position) {
                         playerMadeCapture = true;
                         console.log(i, s.piece);
-                        const pm= s.piece.possibleMoves;
-                        pm.forEach(p =>{
-                            p.piece= null;
+                        const pm = s.piece.possibleMoves;
+                        pm.forEach(p => {
+                            p.piece = null;
                         });
-                        i= i+1;
+                        i = i + 1;
                         movePiece(selectedPiece, s, true);
                         return
                     }
@@ -242,25 +242,25 @@ socket.on('squares', function (squrs) {
         squrs[0] = createPieceObjectByHtmlElement(squrs[0].element)
 
         const pc = JSON.parse(squrs[5]);
-        squrs[1].piece = new Pieces.Piece(pc["color"], JSON.parse(pc["possibleMoves"]));
+        squrs[1].piece = new Pieces.Piece(pc["color"]);
         switch (pc.type) {
             case C.PAWN:
-                squrs[1].piece = new Pieces.Pawn(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Pawn(pc["color"]);
                 break;
             case C.KNIGHT:
-                squrs[1].piece = new Pieces.Knight(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Knight(pc["color"]);
                 break;
             case C.BISHOP:
-                squrs[1].piece = new Pieces.Bishop(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Bishop(pc["color"]);
                 break;
             case C.ROOK:
-                squrs[1].piece = new Pieces.Rook(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Rook(pc["color"]);
                 break;
             case C.QUEEN:
-                squrs[1].piece = new Pieces.Queen(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Queen(pc["color"]);
                 break;
             case C.KING:
-                squrs[1].piece = new Pieces.King(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.King(pc["color"]);
                 break;
             default:
                 break;
@@ -341,7 +341,8 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     const currentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
 
     // if is the king
-    if (selectedPiece.type === C.KING && !selectedPiece.object.hasMoved) {
+    if ((selectedPiece.type === C.KING && !selectedPiece.object.hasMoved) || (selectedPiece.type === C.KING && selectedPiece.object.hasMoved && !noskip)) {
+        console.log(squareToMove, selectedPiece);
 
         // if the square to move is for short castling
         let rook = null;
@@ -357,12 +358,13 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
         let rookNewPosition = null;
 
-        if (squareToMove.col === 7 && getAvailableMoves(selectedPiece, false).includes(squareToMove)) {
+        if (squareToMove.col === 7 && (getAvailableMoves(selectedPiece, false, noskip).includes(squareToMove) || (!noskip))) {
             rookPosition = `${8}${squareToMove.row}`;
             rookSquare.col = squareToMove.col - 1;
+
         }
         // if the square to move is for long castling
-        else if (squareToMove.col === 3 && getAvailableMoves(selectedPiece, false).includes(squareToMove)) {
+        else if (squareToMove.col === 3 && getAvailableMoves(selectedPiece, false, noskip).includes(squareToMove) || (!noskip)) {
             rookPosition = `${1}${squareToMove.row}`;
             rookSquare.col = squareToMove.col + 1;
         }
@@ -381,10 +383,12 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
                 rookNewPosition
             );
             // // update the rook position in the squares array
+            squares[parseInt(rookPosition.match(/\d{2}/)[0])].piece = null;
+            // squares[parseInt(rookNewPosition.match(/\d{2}/)[0])].piece.possibleMoves=[];
+            rookSquare.piece.possibleMoves = [];
             squares[parseInt(rookNewPosition.match(/\d{2}/)[0])].piece = rookSquare.piece;
 
             // // remove the selected piece from the squares.
-            squares[parseInt(rookPosition.match(/\d{2}/)[0])].piece = null;
             // squares[parseInt(rookPosition.match(/\d{2}/)[0])].div.className = "square";
         }
     }
@@ -392,7 +396,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
     piece.className = piece.className.replace(
         squarePositionClassName,
-        squareNewPostionClassName
+        squareNewPostionClassName,
     );
 
     if (toCapturePiece) {
@@ -416,6 +420,15 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     currentPlayer = currentPlayer === C.WHITE_PIECE ? C.BLACK_PIECE : C.WHITE_PIECE;
     // let sq = squares[squares.indexOf(squareToMove)] ;
 
+
+    // else {
+    //     // check if opponent king is in check
+    //     console.log("checking if king is in check");
+
+    // }
+
+
+
     if (noskip) {
 
         const elementData = {
@@ -433,11 +446,11 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
         const pieceJ = {};
         if (squareToMove.piece) {
             pieceJ.color = squareToMove.piece.color;
-            pieceJ.possibleMoves = JSON.stringify(squareToMove.piece.possibleMoves);
+            // pieceJ.possibleMoves = JSON.stringify(squareToMove.piece.possibleMoves);
             pieceJ.type = squareToMove.piece.constructor.type;
         } else {
             pieceJ.color = "";
-            pieceJ.possibleMoves = JSON.stringify([]);
+            // pieceJ.possibleMoves = JSON.stringify([]);
             pieceJ.type = "";
         }
 
@@ -445,7 +458,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
         const pieceJ2 = {
             color: selectedPiece.object.color,
-            possibleMoves: JSON.stringify(selectedPiece.object.possibleMoves),
+            // possibleMoves: JSON.stringify(selectedPiece.object.possibleMoves),
             // Add other properties as needed
         };
 
@@ -454,21 +467,12 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
         socket.emit('squares', [selP, sqtm, toCapturePiece, myId, elementJson, pieceJSON, pieceJSON2]);
 
     }
-    // else {
-    //     // check if opponent king is in check
-    //     console.log("checking if king is in check");
-
-    // }
-
-    
     // if it's a pawn make sure not to have the possibility to move up 2 squares
     squareToMove.piece = selectedPiece.object;
-
 
     if (selectedPiece.type === C.PAWN || selectedPiece.type === C.KING || selectedPiece.type === C.ROOK) {
         squareToMove.piece.hasMoved = true;
     }
-
     // update the square where the piece is moved
     squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = squareToMove.piece;
     squares[parseInt(currentPosition)].piece = null;
