@@ -1,0 +1,138 @@
+body {
+  background-attachment: fixed;
+  background-color: #372c27;
+  background-image: url(https://images.chesscomfiles.com/uploads/v1/theme/101411-0.2d687d92.jpg);
+  background-position: center center;
+  background-size: cover;
+}
+
+body {
+  --boardControlsWidth: calc(var(--gutter) * 2);
+  --boardControlsHeight: calc(
+    var(--gutterBoardToTopPlayer) + var(--playerHeight) + var(--boardHeight)
+  );
+  --boardMaxHeight: (
+      var(--100vh) - var(--judoHeight) - var(--boardTopGutter) -
+        var(--playersHeight) - var(--gutterTopPlayerToJudo) - var(--gutter) -
+        var(--gutterBoardToBottomPlayer) - var(--gutterBoardToTopPlayer) -
+        var(--gutterBottomPlayerToAnalysis) - var(--analysisHeight)
+    ) / var(--boardHeightToWidthRatio);
+  --boardMaxWidthWithPieces: var(--100vw) - var(--verticalNavWidth) -
+    var(--gutterBoardToNav) - var(--gutter) - var(--boardControlsWidth) -
+    var(--gutterLeftOfBoard) - var(--evalWidth) - var(--sidebarMinWidth) -
+    var(--adWidth) - var(--extraColumnLeftOfBoard, 0rem);
+  --gutterBoardToNav: -11rem;
+  --horizontalNavHeight: 0rem;
+  --verticalNavWidth: var(--navWidth, 14.5rem);
+  display: grid;
+  grid-template-columns:
+    [left-gutter] 1fr [extra-left] var(--extraColumnLeftOfBoard, 0)
+    [board-layout] min-content [sidebar] minmax(
+      var(--sidebarMinWidth),
+      var(--sidebarMaxWidth)
+    )
+    [right-gutter] 1fr [ad] var(--adWidth) [videos] var(--videoWidth) [extraneous-dom] 0;
+  grid-template-rows: [top] var(--boardRowHeight) [bottom] auto;
+}
+
+body {
+  --100vh: var(--dvh, 100vh);
+  --100vw: var(--dvw, 100vw);
+  --boardContainerWidth: max(
+    var(--boardMinWidth),
+    min(var(--boardMaxWidth), var(--boardMaxHeight))
+  );
+  --boardHeight: calc(var(--boardWidth) * var(--boardHeightToWidthRatio));
+  --boardHeightToWidthRatio: 1;
+  --boardMaxWidthSansOverride: var(--boardMaxWidthWithPieces) -
+    var(--piecesWidth);
+  --boardMaxWidth: min(
+    var(--boardMaxWidthSansOverride),
+    var(--modifiedBoardWidth, var(--boardMaxWidthSansOverride))
+  );
+  --boardMinWidth: 26.4rem;
+  --boardRowHeight: max(
+    calc(
+      var(--100vh) - var(--gutter) - var(--gutterTopPlayerToJudo) -
+        var(--judoHeight) - var(--boardTopGutter) - var(--horizontalNavHeight)
+    ),
+    var(--sidebarMinHeight)
+  );
+  --shf: 4.9406564584124654e-324;
+  --divisibleBy: 8;
+  --subtractFrom: (0.05rem - 1e-10rem);
+  --boardWidth: calc(
+    (
+        (
+            (
+                (var(--boardContainerWidth) / var(--divisibleBy)) -
+                  var(--subtractFrom)
+              ) * var(--shf)
+          ) / var(--shf)
+      ) * var(--divisibleBy)
+  );
+  --evalWidth: 0rem;
+  --gutterBoardToTopPlayer: 0rem;
+  --gutterBoardToBottomPlayer: 0rem;
+  --gutterBottomPlayerToAnalysis: 0rem;
+  --gutterLeftOfBoard: 0rem;
+  --piecesWidth: 0rem;
+  --playerHeight: 0rem;
+  --playersHeight: calc(var(--playerHeight) * 2);
+  --adWidth: 0rem;
+  --analysisHeight: 0rem;
+  --boardTopGutter: 0rem;
+  --evalAndGutter: calc(var(--gutterLeftOfBoard) + var(--evalWidth));
+  --gutter: 1.6rem;
+  --gutterSmall: 1rem;
+  --gutterTopPlayerToJudo: var(--gutter);
+  --judoHeight: 0rem;
+  --sidebarMaxWidth: 50rem;
+  --sidebarMinHeight: 50rem;
+  --sidebarMinWidth: 30rem;
+  --videoWidth: 0rem;
+  padding: calc(
+      var(--gutter) + var(--judoHeight) + var(--boardTopGutter) +
+        var(--horizontalNavHeight)
+    )
+    var(--gutter) var(--gutter)
+    calc(var(--verticalNavWidth) + var(--gutterBoardToNav));
+}
+
+@media (min-height: 700px), (min-width: 1220px) {
+  body.theatre-mode {
+    --gutterBoardToBottomPlayer: 0rem;
+    --gutterBoardToTopPlayer: 0rem;
+    --gutterLeftOfTheaterPlayer: 5rem;
+    --navWidth: 0rem;
+    --playerHeight: 0rem;
+    --theaterPlayerWidth: 12rem;
+    --verticalNavWidth: 0rem;
+    --extraColumnLeftOfBoard: calc(
+      var(--gutterLeftOfTheaterPlayer) + var(--theaterPlayerWidth)
+    );
+    --theaterPlayerHeight: calc(var(--boardHeight) / 2);
+  }
+}
+
+body {
+  --shf: 1 !important;
+  --subtractFrom: 0rem !important;
+}
+/* 
+body.with-players {
+  --gutterBoardToBottomPlayer: var(--gutterSmall);
+  --gutterBoardToTopPlayer: var(--gutterSmall);
+  --playerHeight: 4rem;
+} */
+
+@media (min-width: 960px) {
+  body.with-evaluation {
+    --evalAndGutter: calc(var(--gutterLeftOfBoard) + var(--evalWidth));
+    --evalWidth: 2rem;
+  }
+}
+body.with-evaluation {
+  --evalAndGutter: min-content;
+  --gutterLeftOfBoard: var(--gutterSmall);
+}

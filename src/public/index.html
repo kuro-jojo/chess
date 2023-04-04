@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="css/index.css" type="text/css" />
+    <!--socket.io-->
+</head>
+
+<body class="board-layout with-players with-evaluation theatre-mode" style="--modifiedBoardWidth: 740px;">
+    <div id="board-layout-main" class="board-layout-main">
+        <div id="board-layout-player-top" class="board-layout-player board-layout-top">
+            <div class="player-component player-top player-theatre">
+
+                <div class="player-avatar-component player-avatar">
+                    <img data-cy="avatar" alt="Adversaire" src="https://www.chess.com/bundles/web/images/user-image.svg"
+                        width="40" height="40">
+                    <div class="presence-square-component">
+                        <div class="presence-square-square" style="width: 1rem; height: 1rem"></div>
+                    </div>
+                </div>
+                <div class="player-tagline">
+                    <div class="user-tagline-compact-theatre">
+                        <div class="user-tagline-compact-row">
+                            <!---->
+                            <span id="opponent-id-display"
+                                class="user-username-component user-username-link user-tagline-compact-username">Adversaire</span>
+                        </div>
+                        <div class="user-tagline-compact-row">
+                            <!---->
+                            <!---->
+                            <!---->
+                        </div>
+                    </div>
+                    <!---->
+                </div>
+                <!---->
+
+            </div>
+        </div>
+        <div id="board-layout-chessboard" class="board-layout-chessboard board-board">
+
+            <div id="board-layout-pieces" class="board-layout-pieces">
+                <div id="side-controls"></div>
+            </div>
+            <chess-board class="board" id="board-single">
+                <svg viewBox="0 0 100 100" class="coordinates">
+
+                    <text x="0.75" y="3.5" font-size="2.8" class="coordinate-light">
+                        8
+                    </text>
+                    <text x="0.75" y="15.75" font-size="2.8" class="coordinate-dark">
+                        7
+                    </text>
+                    <text x="0.75" y="28.25" font-size="2.8" class="coordinate-light">
+                        6
+                    </text>
+                    <text x="0.75" y="40.75" font-size="2.8" class="coordinate-dark">
+                        5
+                    </text>
+                    <text x="0.75" y="53.25" font-size="2.8" class="coordinate-light">
+                        4
+                    </text>
+                    <text x="0.75" y="65.75" font-size="2.8" class="coordinate-dark">
+                        3
+                    </text>
+                    <text x="0.75" y="78.25" font-size="2.8" class="coordinate-light">
+                        2
+                    </text>
+                    <text x="0.75" y="90.75" font-size="2.8" class="coordinate-dark">
+                        1
+                    </text>
+                    <text x="10" y="99" font-size="2.8" class="coordinate-dark">
+                        a
+                    </text>
+                    <text x="22.5" y="99" font-size="2.8" class="coordinate-light">
+                        b
+                    </text>
+                    <text x="35" y="99" font-size="2.8" class="coordinate-dark">
+                        c
+                    </text>
+                    <text x="47.5" y="99" font-size="2.8" class="coordinate-light">
+                        d
+                    </text>
+                    <text x="60" y="99" font-size="2.8" class="coordinate-dark">
+                        e
+                    </text>
+                    <text x="72.5" y="99" font-size="2.8" class="coordinate-light">
+                        f
+                    </text>
+                    <text x="85" y="99" font-size="2.8" class="coordinate-dark">
+                        g
+                    </text>
+                    <text x="97.5" y="99" font-size="2.8" class="coordinate-light">
+                        h
+                    </text>
+                </svg><!--/Coordinates-->
+                <div class="element-pool"></div>
+                <div class="element-pool" data-test-element=""></div>
+                <div class="element-pool" data-test-element=""></div>
+
+                <div id="grid-overlay"></div>
+
+                <!--/Hover Square--><!--/Effects-->
+                <div class="piece wp square-22"></div>
+                <div class="piece square-78 bn"></div>
+                <div class="piece wp square-12"></div>
+                <div class="piece square-58 bk"></div>
+                <div class="piece wr square-81"></div>
+                <div class="piece wn square-71"></div>
+                <div class="piece wb square-61"></div>
+                <div class="piece wk square-51"></div>
+                <div class="piece bp square-87"></div>
+                <div class="piece wb square-31"></div>
+                <div class="piece wn square-21"></div>
+                <div class="piece wr square-11"></div>
+                <div class="piece wp square-32"></div>
+                <div class="piece wp square-42"></div>
+                <div class="piece wp square-62"></div>
+                <div class="piece bp square-17"></div>
+                <div class="piece wp square-82"></div>
+                <div class="piece square-72 wp"></div>
+                <div class="piece bp square-27"></div>
+                <div class="piece square-52 wp"></div>
+                <div class="piece bp square-37"></div>
+                <div class="piece bp square-47"></div>
+                <div class="piece bp square-57"></div>
+                <div class="piece bp square-67"></div>
+                <div class="piece bp square-77"></div>
+                <div class="piece br square-18"></div>
+                <div class="piece bn square-28"></div>
+                <div class="piece bb square-38"></div>
+                <div class="piece square-41 wq"></div>
+                <div class="piece bq square-48"></div>
+                <div class="piece bb square-68"></div>
+                <div class="piece br square-88"></div>
+                <svg viewBox="0 0 100 100" class="arrows"></svg>
+            </chess-board>
+
+        </div>
+        <div id="board-layout-player-bottom" class="board-layout-player board-layout-bottom">
+            <div class="player-component player-bottom player-theatre">
+
+                <div class="player-avatar-component player-avatar">
+                    <img data-cy="avatar" alt=""
+                        src="https://www.chess.com/bundles/web/images/user-image.svg"
+                        width="40" height="40">
+                    <div class="presence-square-component">
+                        <div class="presence-square-square" style="width: 1rem; height: 1rem"></div>
+                    </div>
+                </div>
+                <div class="player-tagline">
+                    <div class="user-tagline-compact-theatre">
+                        <div class="user-tagline-compact-row">
+                            <!---->
+                            <span id="player-id"
+                                class="user-username-component user-username-link user-tagline-compact-username">kuro_O8</span>
+                        </div>
+                    </div>
+                    <!---->
+                </div>
+                <!---->
+            </div>
+        </div>
+    </div>
+
+    <div id="board-layout-sidebar" class="board-layout-sidebar">
+
+        <div class="focus-mode-controls-component" style="height: 70%;"><!----> <!---->
+            <div>
+                <div>
+                    <input type="text" placeholder="Entrez id adversaire" id="opponent-id"
+                        class="ui_v5-button-component ui_v5-button-primary ui_v5-button-full input" />
+                </div>
+                <div>
+                    <button type="button" id="play-button"
+                        class="ui_v5-button-component ui_v5-button-primary ui_v5-button-large ui_v5-button-full"
+                        data-cy="focus-mode-play">
+                        Jouer
+                    </button>
+                </div>
+            </div> <!----> <!----> <!---->
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/board.js" type="module">
+    </script>
+</body>
+
+</html>

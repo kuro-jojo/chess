@@ -1,0 +1,181 @@
+@import url(body.css);
+@import url(pieces.css);
+@import url(pieces_mvt.css);
+@import url(clock.css);
+@import url(playSide.css);
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+html {
+  overflow: hidden;
+}
+@media (min-height: 700px), (min-width: 1220px) {
+  body.theatre-mode .board-layout-player {
+    height: var(--theaterPlayerHeight);
+    left: calc(
+      0rem - var(--evalWidth) - var(--piecesWidth) - var(--gutterLeftOfBoard) -
+        var(--theaterPlayerWidth)
+    );
+    position: absolute;
+    width: calc(var(--theaterPlayerWidth) - 2rem);
+  }
+}
+
+.board-layout-main {
+  display: flex;
+  flex-direction: column;
+  grid-area: top/board-layout;
+  margin: 0 auto;
+  position: relative;
+  width: min-content;
+}
+
+.board-layout-player {
+  flex-shrink: 0;
+  height: var(--playerHeight);
+  margin: 0 var(--boardControlsWidth) 0 auto;
+  position: relative;
+  width: var(--boardWidth);
+}
+
+.player-component {
+  display: flex;
+  flex: 1;
+}
+
+.board-layout-chessboard {
+  display: grid;
+  grid-template-columns:
+    [evaluation] var(--evalAndGutter) [pieces] var(--piecesWidth)
+    [board] var(--boardContainerWidth) [board-controls] var(--boardControlsWidth);
+  margin: var(--gutterBoardToTopPlayer) 0 var(--gutterBoardToBottomPlayer) auto;
+  position: relative;
+}
+
+#board-single,
+.fade-in-overlay {
+  background-image: url("../images/board.png");
+}
+
+.board-layout-chessboard .board {
+  grid-column: board;
+  height: var(--boardHeight) !important;
+  margin-left: calc(var(--boardContainerWidth) - var(--boardWidth));
+  padding-bottom: 0;
+  width: var(--boardWidth) !important;
+}
+
+.board {
+  background-repeat: no-repeat;
+  background-size: 100%;
+  border-radius: 3px;
+  contain: layout;
+  height: 100%;
+  position: relative;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  width: 100%;
+}
+
+@media (min-height: 700px), (min-width: 1220px) {
+  body.theatre-mode .board-layout-bottom {
+    top: var(--theaterPlayerHeight);
+  }
+}
+
+.player-component.player-theatre.player-top .player-avatar {
+  top: 3rem;
+}
+
+.player-component.player-theatre .player-avatar,
+.player-component.player-theatre .player-avatar > img {
+  border-radius: 0.3rem;
+  height: 4rem;
+  width: 4rem;
+}
+
+.player-component.player-theatre .player-avatar {
+  left: 50%;
+  position: absolute;
+  transform: translate(-50%);
+}
+
+.player-component .player-avatar {
+  display: flex;
+  position: relative;
+}
+
+.player-component.player-theatre.player-top .player-tagline {
+  top: 8rem;
+}
+.player-component.player-theatre .player-tagline {
+  margin: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.user-tagline-compact-theatre .user-tagline-compact-row {
+  justify-content: center;
+}
+.user-tagline-compact-row {
+  align-items: center;
+  display: flex;
+  gap: 0.6rem;
+}
+.board-layout,
+.board-layout * {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.user-tagline-compact-theatre .user-tagline-compact-username {
+  color: #fff;
+}
+.user-tagline-compact-username {
+  font-size: 1.4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.user-username-link {
+  cursor: pointer;
+}
+.user-username-component {
+  font-size: var(--user-username, 1.4rem);
+  font-weight: 600;
+  line-height: 1.3;
+  user-select: text;
+}
+
+.player-component.player-theatre.player-bottom .player-avatar {
+  bottom: 5rem;
+}
+
+#grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  grid-template-columns: repeat(8, 1fr);
+  grid-gap: 0;
+}
+
+#grid-overlay > div {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.piece {
+  transition: transform 0.2s;
+}
+
+.rotateBoard {
+  transform: rotate(180deg);
+}
