@@ -3,21 +3,13 @@ import * as Pieces from "./pieces.js";
 import * as T from "./types.js";
 
 const socket = io('ws://localhost:3000');
-import { initiateGame, setUpSocketListeners } from "./socket.js";
-// function initiateGame(myId, opponentId) {
-//     console.log('Initiating game ...', myId, opponentId);
-//     if (myId != opponentId) {
-//         socket.emit('gameStarted', [myId, opponentId]);
-//     } else {
-//         alert('Sorry !!! You cannot play against yourself 😊');
-//     }
-// }
-// socket.io
-// Player's id
+import { initiateGame } from "./socket.js";
+
 let myId;
 let opponentId;
 let playerColor;
 let currentPlayer = C.WHITE_PIECE;
+const flipClass = 'flip';
 // let idObj = {currentIdColor: currentIdColor, opponentId: opponentId};
 
 const playerIdElement = document.getElementById("player-id");
@@ -64,9 +56,9 @@ let previousMovedPiece = null;
 
 function rotateBoard() {
     board.classList.toggle("rotateBoard");
-    // gridOverlay.classList.toggle("rotate");
     pieces.forEach((piece) => {
-        piece.classList.toggle("rotateBoard");
+        piece.style.background = "none";
+        piece.classList.add(flipClass);
     });
 }
 /**
@@ -183,7 +175,6 @@ playButton.addEventListener("click", () => {
 // add event listeners to each chess piece
 pieces.forEach((piece) => {
     piece.addEventListener("click", () => {
-
         if (opponentId != "") {
             // set the starting position of the piece
             piece.style.position = "absolute";
@@ -245,7 +236,9 @@ pieces.forEach((piece) => {
 socket.on('gameStarted', gameStarted => {
     if (gameStarted[1] == myId) {
         playerColor = Math.random() < 0.5 ? C.WHITE_PIECE : C.BLACK_PIECE;
-
+        if (playerColor === C.BLACK_PIECE) {
+            rotateBoard()
+        }
         console.log('Accepting game ...');
         alert('Your opponent has started a game with you. You are playing as ' + (playerColor == C.WHITE_PIECE ? 'white' : 'black') + '.');
 
@@ -264,6 +257,9 @@ socket.on('gameAccepted', gameAccepted => {
     if (gameAccepted[0] == myId) {
         // retrieve the opponent color
         playerColor = gameAccepted[2];
+        if (playerColor === C.BLACK_PIECE) {
+            rotateBoard()
+        }
         console.log('Starting game ...');
         alert('Your are playing as ' + (playerColor == C.WHITE_PIECE ? 'white' : 'black') + '.');
 
@@ -277,7 +273,7 @@ socket.on('gameAccepted', gameAccepted => {
 socket.on('movePiece', function (squrs) {
     if (squrs[3] != myId) {
         console.log('Receiving move ...');
-        squrs[0].element = document.getElementsByClassName(JSON.parse(squrs[4]).className)[0];
+        squrs[0].element = document.getElementsByClassName(JSON.parse(squrs[4]).className.replace(flipClass, ''))[0];
 
         squrs[0] = createPieceObjectByHtmlElement(squrs[0].element)
 
@@ -335,7 +331,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     const sqtm = { ...squareToMove };
 
     // if it is not the turn of the right player he cannot move the piece
-    // console.log('currentIdColor', currentIdColor);
     if (currentPlayer !== selectedPiece.color) {
         return selectedPiece;
     }
@@ -368,7 +363,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     const currentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
 
     // CASTLING
-    
+
     if ((selectedPiece.type === C.KING && !selectedPiece.object.hasMoved)) {
         kingCastling(selectedPiece, squareToMove, noskip);
     }
@@ -444,7 +439,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     // update the square where the piece is moved
     squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = squareToMove.piece;
     squares[parseInt(currentPosition)].piece = null;
- 
+
     const [isKingInCheck, kingPosition] = kingInCheck(currentPlayer);
     //let isKingInCheck= false;
     if (isKingInCheck) {
