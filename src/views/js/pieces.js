@@ -413,7 +413,7 @@ export class King extends Piece {
                 }
             }
             // long castle
-            if (rookPositions[0] !== null && rookPositions[0].piece.constructor.type === C.ROOK && !rookPositions[0].hasMoved) {
+            if (rookPositions[0].piece !== null && rookPositions[0].piece.constructor.type === C.ROOK && !rookPositions[0].hasMoved) {
                 // check if the king can move to 3 squares to the left and if the rook is still in place and has not moved
                 if (!this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)], possibleMoves)) {
                     this.checkObstacle(squares[parseInt(`${col - 2}${row}`, 10)], possibleMoves);

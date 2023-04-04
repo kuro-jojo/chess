@@ -2,7 +2,8 @@ import * as C from "./consts.js";
 import * as Pieces from "./pieces.js";
 import * as T from "./types.js";
 
-const socket = io('ws://156.18.66.184:3000');
+// const socket = io('ws://156.18.66.184:3000');
+const socket = io('ws://localhost:3000');
 import { initiateGame } from "./socket.js";
 
 // sound effects
