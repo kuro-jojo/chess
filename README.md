@@ -14,11 +14,19 @@ This is a web-based multiplayer chess game implemented in JavaScript using Node.
 
 ## Usage
 
-1. Start the server by running `node index.js`.
+1. Start the server by running `npm start`.
 2. Open your web browser and navigate to `http://localhost:3000`.
-3. Create a new game or join an existing game.
-4. Play chess with your opponent.
+3. Enter your opponent ID in the reserved place.
+4. Enjoy the game.
 
+## Features
+
+In this we implement the following features : 
+1. Basics:
+  a. Piece movement
+  b. Capture
+2. King Castling (long and short)
+3. Check and Checkmate
 <!-- ## Contributing
 
 If you would like to contribute to this project, please follow these steps:
