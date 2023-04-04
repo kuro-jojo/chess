@@ -2,7 +2,7 @@ import * as C from "./consts.js";
 import * as Pieces from "./pieces.js";
 import * as T from "./types.js";
 
-const socket = io('ws://localhost:3000');
+const socket = io('ws://156.18.66.184:3000');
 import { initiateGame } from "./socket.js";
 
 let myId;
@@ -196,13 +196,6 @@ pieces.forEach((piece) => {
                     // if in the square there is the piece we select now we move the selected piece into that square
                     if (s && s === tmp_piece.position) {
                         playerMadeCapture = true;
-                        // console.log(i, s.piece);
-                        // if (s.piece) {
-                        //     const pm = s.piece.possibleMoves;
-                        //     pm.forEach(p => {
-                        //         p.piece = null;
-                        //     });
-                        // }
                         i = i + 1;
                         movePiece(selectedPiece, s, true);
                         return
@@ -275,7 +268,6 @@ socket.on('gameAccepted', gameAccepted => {
 });
 
 socket.on('movePiece', function (squrs) {
-    console.log('squrs', squrs);
     if (squrs[3] != myId) {
         console.log('Receiving move ...');
         squrs[0].element = document.getElementsByClassName(JSON.parse(squrs[4]).className.replace(flipClass, ''))[0];
@@ -308,8 +300,6 @@ socket.on('movePiece', function (squrs) {
         }
 
         squrs[1].div = squares["" + squrs[1].col + squrs[1].row].div;
-            
-            console.log('squrs[0]', squrs[0]);
         movePiece(squrs[0], squrs[1], squrs[2], false);
     }
 });
@@ -368,9 +358,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     if (previousMovedPiece) {
         previousMovedPiece.element.style.backgroundColor = "";
     }
-    if (!noskip) {
-        console.log('selectedPiece', getAvailableMoves(selectedPiece, false, noskip));
-    }
+    
     // the square where to move might be a valid one
     let incl = false;
     getAvailableMoves(selectedPiece, false, noskip).forEach(move => {
