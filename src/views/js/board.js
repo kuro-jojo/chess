@@ -1,42 +1,47 @@
 import * as C from "./consts.js";
 import * as Pieces from "./pieces.js";
 import * as T from "./types.js";
-// import { Piece } from "./types.js";
+
+const socket = io('ws://localhost:3000');
+import { initiateGame } from "./socket.js";
+
+let myId;
+let opponentId;
+let playerColor;
+let currentPlayer = C.WHITE_PIECE;
+const flipClass = 'flip';
+
+let kingIsInCheck = false; // check if the king of the player is in check
+
+const playerIdElement = document.getElementById("player-id");
+(function generateId() {
+    // generate a random id
+    myId = makeid(4);
+    playerIdElement.innerHTML = myId;
+})();
+
+// set up socket listeners
+// setUpSocketListeners(socket, myId);
 
 // get the chess board and pieces from the DOM
-
-// socket.io
-const socket = io('ws://localhost:3000');
-const play = document.getElementById("play-button");
-
 const board = document.getElementById("board-single");
 const gridOverlay = document.getElementById("grid-overlay");
 const pieces = document.querySelectorAll(".piece");
+
 const selectedPieceSquareColor = "rgba(165, 126, 53, 0.7)";
 const previousSquareColor = "rgba(165, 126, 53, 0.5)";
+const pieceDefaultBackGroundColor = "inherit";
+const kingInCheckBackGroundColor = "orange";
 
-const capturedPieces = new Map();
-
-// First player is white
-let currentPlayer = C.WHITE_PIECE;
-
-// Player's id
-let myId;
-let playerId = document.getElementById("player-id");
+const playButton = document.getElementById("play-button");
 // get the playerId
 
-// Oponent's id
-let oponentId = "";
-
-(function generateId() {
-    // generee
-    myId = makeid(7);
-    playerId.innerHTML = myId;
-})();
+// TODO:
+// const capturedPieces = new Map();
 
 // color of the player
-let currentIdColor = C.WHITE_PIECE;
 let playerMadeCapture = false;
+
 // track the currently selected piece
 /**
  * @type {T.Piece}
@@ -51,6 +56,15 @@ let previousMovedSquare = null;
  */
 let previousMovedPiece = null;
 
+
+
+function rotateBoard() {
+    board.classList.toggle("rotateBoard");
+    pieces.forEach((piece) => {
+        piece.style.background = "none";
+        piece.classList.add(flipClass);
+    });
+}
 /**
  * @type {T.Square[]}
  */
@@ -59,7 +73,7 @@ let squares = (function () {
     /**
      * @type {T.Square[]}
      */
-    let squares = []
+    let tmp_squares = []
     // Iterate through each cell in the grid
     for (let row = 8; row >= 1; row--) {
         for (let col = 1; col <= 8; col++) {
@@ -93,7 +107,7 @@ let squares = (function () {
                     selectedPiece = movePiece(selectedPiece, square, false);
                 }
             });
-            squares[parseInt("" + col + row)] = square;
+            tmp_squares[parseInt("" + col + row)] = square;
         }
     }
 
@@ -103,8 +117,8 @@ let squares = (function () {
         const rows = [1, 2, 7, 8];
         for (let col = 1; col <= 8; col++) {
             // pawns on 2 and 7 rank
-            squares[parseInt(`${col}${rows[1]}`)].piece = new Pieces.Pawn(C.WHITE_PIECE);
-            squares[parseInt(`${col}${rows[2]}`)].piece = new Pieces.Pawn(C.BLACK_PIECE);
+            tmp_squares[parseInt(`${col}${rows[1]}`)].piece = new Pieces.Pawn(C.WHITE_PIECE);
+            tmp_squares[parseInt(`${col}${rows[2]}`)].piece = new Pieces.Pawn(C.BLACK_PIECE);
         }
         // 1. White , 8. Black
         init_pieces(1, C.ROOK);
@@ -123,58 +137,73 @@ let squares = (function () {
             const color = row === 1 ? C.WHITE_PIECE : C.BLACK_PIECE;
             switch (type) {
                 case C.ROOK:
-                    squares[parseInt(`${1}${row}`)].piece = new Pieces.Rook(color);
-                    squares[parseInt(`${8}${row}`)].piece = new Pieces.Rook(color);
+                    tmp_squares[parseInt(`${1}${row}`)].piece = new Pieces.Rook(color);
+                    tmp_squares[parseInt(`${8}${row}`)].piece = new Pieces.Rook(color);
                     break;
                 case C.BISHOP:
-                    squares[parseInt(`${3}${row}`)].piece = new Pieces.Bishop(color);
-                    squares[parseInt(`${6}${row}`)].piece = new Pieces.Bishop(color);
+                    tmp_squares[parseInt(`${3}${row}`)].piece = new Pieces.Bishop(color);
+                    tmp_squares[parseInt(`${6}${row}`)].piece = new Pieces.Bishop(color);
                     break;
                 case C.KNIGHT:
-                    squares[parseInt(`${2}${row}`)].piece = new Pieces.Knight(color);
-                    squares[parseInt(`${7}${row}`)].piece = new Pieces.Knight(color);
+                    tmp_squares[parseInt(`${2}${row}`)].piece = new Pieces.Knight(color);
+                    tmp_squares[parseInt(`${7}${row}`)].piece = new Pieces.Knight(color);
                     break;
                 case C.QUEEN:
-                    squares[parseInt(`${4}${row}`)].piece = new Pieces.Queen(color);
+                    tmp_squares[parseInt(`${4}${row}`)].piece = new Pieces.Queen(color);
                     break;
                 case C.KING:
-                    squares[parseInt(`${5}${row}`)].piece = new Pieces.King(color);
+                    tmp_squares[parseInt(`${5}${row}`)].piece = new Pieces.King(color);
                     break;
                 default:
                     break;
             }
         }
     })();
-    return squares;
+    return tmp_squares;
 })();
 
 // add event listener to play button
-play.addEventListener("click", () => {
-    if (document.getElementById("oponent-id").value != "") {
-        initiateGame(document.getElementById("oponent-id").value);
+playButton.addEventListener("click", () => {
+    if (document.getElementById("opponent-id").value != "") {
+        initiateGame(myId, document.getElementById("opponent-id").value, socket);
     }
 });
+
+
+// set up the board with the pieces in their starting positions
+
+
+// setUpSocketListeners(socket, myId, squares, idObj);
+// ({ currentIdColor, opponentId } = idObj);
 
 // add event listeners to each chess piece
 pieces.forEach((piece) => {
     piece.addEventListener("click", () => {
-
-        if (oponentId != "") {
+        if (opponentId != "") {
             // set the starting position of the piece
             piece.style.position = "absolute";
             piece.style.left = "0";
             piece.style.top = "0";
 
-            // hide the availabeles moves when another piece is selected 
+            // hide the availables moves when another piece is selected 
             if (selectedPiece) {
                 const sq = getAvailableMoves(selectedPiece, false);
                 let p = [];
                 const tmp_piece = createPieceObjectByHtmlElement(piece);
 
+                let i = 0;
                 sq.forEach(s => {
                     // if in the square there is the piece we select now we move the selected piece into that square
                     if (s && s === tmp_piece.position) {
                         playerMadeCapture = true;
+                        // console.log(i, s.piece);
+                        // if (s.piece) {
+                        //     const pm = s.piece.possibleMoves;
+                        //     pm.forEach(p => {
+                        //         p.piece = null;
+                        //     });
+                        // }
+                        i = i + 1;
                         movePiece(selectedPiece, s, true);
                         return
                     }
@@ -198,98 +227,125 @@ pieces.forEach((piece) => {
                     // when we captured a piece the square is auto selected so we avoid that
                     getAvailableMoves(selectedPiece, false);
                 }
-                selectedPiece = createPieceObjectByHtmlElement(piece);
+
                 piece.style.backgroundColor = selectedPieceSquareColor;
+                selectedPiece = createPieceObjectByHtmlElement(piece);
             }
             getAvailableMoves(selectedPiece);
         }
     });
 });
 
-//Accepts a game started by an oponent
-socket.on('gameStart', gameStart => {
-    if (gameStart[1] == myId) {
+
+socket.on('gameStarted', gameStarted => {
+    if (gameStarted[1] == myId) {
+        playerColor = Math.random() < 0.5 ? C.WHITE_PIECE : C.BLACK_PIECE;
+        if (playerColor === C.BLACK_PIECE) {
+            rotateBoard()
+        }
         console.log('Accepting game ...');
-        socket.emit('gameAccepted', gameStart);
-        oponentId = gameStart[0];
-        currentIdColor = C.BLACK_PIECE;
+        alert('Your opponent has started a game with you. You are playing as ' + (playerColor == C.WHITE_PIECE ? 'white' : 'black') + '.');
+
+        opponentId = gameStarted[0];
+        document.getElementById("opponent-id-display").innerHTML = opponentId;
+
+        // send the opponent color
+        gameStarted[2] = playerColor === C.WHITE_PIECE ? C.BLACK_PIECE : C.WHITE_PIECE;
+        socket.emit('gameAccepted', gameStarted);
     }
 });
 
-//Starts a game accepted by an oponent
+//Starts a game accepted by an opponent
 socket.on('gameAccepted', gameAccepted => {
 
     if (gameAccepted[0] == myId) {
+        // retrieve the opponent color
+        playerColor = gameAccepted[2];
+        if (playerColor === C.BLACK_PIECE) {
+            rotateBoard()
+        }
         console.log('Starting game ...');
-        oponentId = gameAccepted[1];
-        document.getElementById("oponent-id-display").innerHTML = oponentId;
-        currentIdColor = C.WHITE_PIECE;
+        alert('Your are playing as ' + (playerColor == C.WHITE_PIECE ? 'white' : 'black') + '.');
+
+        opponentId = gameAccepted[1];
+        document.getElementById("opponent-id-display").innerHTML = opponentId;
+    } else {
+        console.log('Not an opponent ...');
     }
 });
 
-socket.on('squares', function (squrs) {
+socket.on('movePiece', function (squrs) {
+    console.log('squrs', squrs);
     if (squrs[3] != myId) {
         console.log('Receiving move ...');
-        squrs[0].element = document.getElementsByClassName(JSON.parse(squrs[4]).className)[0];
+        squrs[0].element = document.getElementsByClassName(JSON.parse(squrs[4]).className.replace(flipClass, ''))[0];
 
         squrs[0] = createPieceObjectByHtmlElement(squrs[0].element)
 
         const pc = JSON.parse(squrs[5]);
-        squrs[1].piece = new Pieces.Piece(pc["color"], JSON.parse(pc["possibleMoves"]));
+        squrs[1].piece = new Pieces.Piece(pc["color"]);
         switch (pc.type) {
             case C.PAWN:
-                squrs[1].piece = new Pieces.Pawn(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Pawn(pc["color"]);
                 break;
             case C.KNIGHT:
-                squrs[1].piece = new Pieces.Knight(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Knight(pc["color"]);
                 break;
             case C.BISHOP:
-                squrs[1].piece = new Pieces.Bishop(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Bishop(pc["color"]);
                 break;
             case C.ROOK:
-                squrs[1].piece = new Pieces.Rook(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Rook(pc["color"]);
                 break;
             case C.QUEEN:
-                squrs[1].piece = new Pieces.Queen(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.Queen(pc["color"]);
                 break;
             case C.KING:
-                squrs[1].piece = new Pieces.King(pc["color"], JSON.parse(pc["possibleMoves"]));
+                squrs[1].piece = new Pieces.King(pc["color"]);
                 break;
             default:
                 break;
         }
 
         squrs[1].div = squares["" + squrs[1].col + squrs[1].row].div;
-        console.log(squrs[0], squrs[1]);
+            
+            console.log('squrs[0]', squrs[0]);
         movePiece(squrs[0], squrs[1], squrs[2], false);
     }
 });
 
-/**
- * Initiates a new game against the specified oponent
- * @param {String} oponentId - The id of the oponent
- * @returns {void}
- */
-function initiateGame(oponentId) {
-    console.log('Initiating game ...')
-    socket.emit('gameStart', [myId, oponentId]);
-}
+socket.on('disconnect', () => {
+    console.log('Socket disconnected!');
+});
 
+socket.on('error', (err) => {
+    console.error('Socket error:', err);
+});
 
 /**
  * 
- * @param {HtmlElement} piece 
+ * @param {Pieces.Piece} piece 
+ * @returns 
  */
-function createPieceObjectByHtmlElement(piece) {
-    return {
-        element: piece,
-        color: getPieceProperties(piece).color,
-        type: getPieceProperties(piece).type,
-        object: getPieceProperties(piece).pieceObject,
-        position: getPieceProperties(piece).position,
-    };
+function createPiece(piece) {
+    if (!piece) {
+        return piece;
+    }
+    switch (piece.constructor.type) {
+        case C.PAWN:
+            return new Pieces.Pawn(piece.color, piece.hasMoved);
+        case C.KNIGHT:
+            return new Pieces.Knight(piece.color, piece.hasMoved);
+        case C.BISHOP:
+            return new Pieces.Bishop(piece.color, piece.hasMoved);
+        case C.ROOK:
+            return new Pieces.Rook(piece.color, piece.hasMoved);
+        case C.QUEEN:
+            return new Pieces.Queen(piece.color, piece.hasMoved);
+        case C.KING:
+            return new Pieces.King(piece.color, piece.hasMoved);
+    }
 }
-
 /**
  *
  * @param {T.Piece} selectedPiece
@@ -300,7 +356,6 @@ function createPieceObjectByHtmlElement(piece) {
 function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip = true) {
     const selP = { ...selectedPiece };
     const sqtm = { ...squareToMove };
-    // console.log(squareToMove.piece, selectedPiece.object)
 
     // if it is not the turn of the right player he cannot move the piece
     if (currentPlayer !== selectedPiece.color) {
@@ -313,8 +368,10 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     if (previousMovedPiece) {
         previousMovedPiece.element.style.backgroundColor = "";
     }
+    if (!noskip) {
+        console.log('selectedPiece', getAvailableMoves(selectedPiece, false, noskip));
+    }
     // the square where to move might be a valid one
-
     let incl = false;
     getAvailableMoves(selectedPiece, false, noskip).forEach(move => {
         if (move.col === squareToMove.col && move.row === squareToMove.row) {
@@ -331,64 +388,43 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     const pieceSave = selectedPiece.element.cloneNode(true);
 
     const piece = selectedPiece.element;
-    const squarePositionClassName = /square-\d+/;
     const squareNewPostionClassName = `square-${squareToMove.col}${squareToMove.row}`;
     const currentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
 
-    // if is the king
-    if (selectedPiece.type === C.KING && !selectedPiece.object.hasMoved) {
+    // check sytem
+    if (kingIsInCheck && currentPlayer === playerColor) {
+        const backupSquarePiece = createPiece(squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece);
+        const backupCurrentPiece = createPiece(squares[parseInt(currentPosition)].piece);
 
-        // if the square to move is for short castling
-        let rook = null;
-        let rookPosition = null;
-        /**
-         * @type {T.Square}
-         */
-        let rookSquare = {
-            width: squareToMove.width,
-            height: squareToMove.height,
-            row: squareToMove.row,
-        };
+        // update the square where the piece is moved
+        squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = selectedPiece.object;
+        squares[parseInt(currentPosition)].piece = null;
 
-        let rookNewPosition = null;
-
-        if (squareToMove.col === 7 && getAvailableMoves(selectedPiece, false).includes(squareToMove)) {
-            rookPosition = `${8}${squareToMove.row}`;
-            rookSquare.col = squareToMove.col - 1;
+        const [kingInCheck, kingPosition] = isKingInCheck(selectedPiece.object.color);
+        if (kingInCheck) {
+            // restore the previous state
+            squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = backupSquarePiece;
+            squares[parseInt(currentPosition)].piece = backupCurrentPiece;
+            return null;
         }
-        // if the square to move is for long castling
-        else if (squareToMove.col === 3 && getAvailableMoves(selectedPiece, false).includes(squareToMove)) {
-            rookPosition = `${1}${squareToMove.row}`;
-            rookSquare.col = squareToMove.col + 1;
-        }
+        squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = backupSquarePiece;
+        squares[parseInt(currentPosition)].piece = backupCurrentPiece;
+        alert("You are no longer in check");
+        kingIsInCheck = false;
+        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = false;
+        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
 
-        rook = document.getElementsByClassName(`square-${rookPosition}`);
+    }
 
-        if (rook[0]) {
-            rookNewPosition = `square-${rookSquare.col}${rookSquare.row}`;
-            rookSquare.div = squareToMove.div;
-            rookSquare.piece = squares[parseInt(rookPosition.match(/\d{2}/)[0])].piece;
-            rookSquare.piece.hasMoved = true;
-            selectedPiece.object.hasMoved = true;
-
-            rook[0].className = rook[0].className.replace(
-                squarePositionClassName,
-                rookNewPosition
-            );
-            // // update the rook position in the squares array
-            squares[parseInt(rookNewPosition.match(/\d{2}/)[0])].piece = rookSquare.piece;
-
-            // // remove the selected piece from the squares.
-            squares[parseInt(rookPosition.match(/\d{2}/)[0])].piece = null;
-            // squares[parseInt(rookPosition.match(/\d{2}/)[0])].div.className = "square";
-        }
-
+    // CASTLING
+    if ((selectedPiece.type === C.KING && !selectedPiece.object.hasMoved && !selectedPiece.object.isInCheck)) {
+        kingCastling(selectedPiece, squareToMove, noskip);
     }
     // move the piece
 
     piece.className = piece.className.replace(
-        squarePositionClassName,
-        squareNewPostionClassName
+        /square-\d+/,
+        squareNewPostionClassName,
     );
 
     if (toCapturePiece) {
@@ -399,8 +435,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
             `${squareNewPostionClassName} 
             ${squareToMove.piece.color}${squareToMove.piece.constructor.type}`
         );
-        console.log("to capture piece " + elements);
-        console.log(squareToMove.piece, selectedPiece.object)
         elements[0].parentNode.removeChild(elements[0]);
     }
 
@@ -412,7 +446,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
     // after moving the piece we switch player turn
     currentPlayer = currentPlayer === C.WHITE_PIECE ? C.BLACK_PIECE : C.WHITE_PIECE;
-    // let sq = squares[squares.indexOf(squareToMove)] ;
 
     if (noskip) {
 
@@ -431,11 +464,11 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
         const pieceJ = {};
         if (squareToMove.piece) {
             pieceJ.color = squareToMove.piece.color;
-            pieceJ.possibleMoves = JSON.stringify(squareToMove.piece.possibleMoves);
+            // pieceJ.possibleMoves = JSON.stringify(squareToMove.piece.possibleMoves);
             pieceJ.type = squareToMove.piece.constructor.type;
         } else {
             pieceJ.color = "";
-            pieceJ.possibleMoves = JSON.stringify([]);
+            // pieceJ.possibleMoves = JSON.stringify([]);
             pieceJ.type = "";
         }
 
@@ -443,28 +476,117 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
         const pieceJ2 = {
             color: selectedPiece.object.color,
-            possibleMoves: JSON.stringify(selectedPiece.object.possibleMoves),
+            // possibleMoves: JSON.stringify(selectedPiece.object.possibleMoves),
             // Add other properties as needed
         };
-
         const pieceJSON2 = JSON.stringify(pieceJ2);
+        socket.emit('movePiece', [selP, sqtm, toCapturePiece, myId, elementJson, pieceJSON, pieceJSON2]);
 
-        socket.emit('squares', [selP, sqtm, toCapturePiece, myId, elementJson, pieceJSON, pieceJSON2]);
     }
-
     // if it's a pawn make sure not to have the possibility to move up 2 squares
     squareToMove.piece = selectedPiece.object;
-
 
     if (selectedPiece.type === C.PAWN || selectedPiece.type === C.KING || selectedPiece.type === C.ROOK) {
         squareToMove.piece.hasMoved = true;
     }
-
     // update the square where the piece is moved
     squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = squareToMove.piece;
     squares[parseInt(currentPosition)].piece = null;
 
+    const [kingInCheck, kingPosition] = isKingInCheck(currentPlayer);
+    //let isKingInCheck= false;
+    if (kingInCheck) {
+        const king = squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)];
+        // king.div.style.backgroundColor = "orange";
+        if (currentPlayer === playerColor) {
+            alert("You are in check");
+            kingIsInCheck = true;
+            squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = true;
+            squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = kingInCheckBackGroundColor;
+        }
+        return null;
+
+    } else if (currentPlayer === playerColor && kingIsInCheck) {
+        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = false;
+        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
+
+        kingIsInCheck = false;
+    }
+
     return null;
+}
+
+/**
+ * 
+ * @param {T.Piece} selectedPiece 
+ * @param {T.Square} squareToMove 
+ * @param {boolean} noskip True if we just retransmit the move
+ */
+function kingCastling(selectedPiece, squareToMove, noskip) {
+    // if the square to move is for short castling
+    let rook = null;
+    let rookPosition = null;
+    const squarePositionClassName = /square-\d+/;
+    /**
+     * @type {T.Square}
+     */
+    let rookSquare = {
+        width: squareToMove.width,
+        height: squareToMove.height,
+        row: squareToMove.row,
+    };
+
+    let rookNewPosition = null;
+
+    if (squareToMove.col === 7 && (getAvailableMoves(selectedPiece, false, noskip).includes(squareToMove) || (!noskip))) {
+        rookPosition = `${8}${squareToMove.row}`;
+        rookSquare.col = squareToMove.col - 1;
+
+    }
+    // if the square to move is for long castling
+    else if (squareToMove.col === 3 && getAvailableMoves(selectedPiece, false, noskip).includes(squareToMove) || (!noskip)) {
+        rookPosition = `${1}${squareToMove.row}`;
+        rookSquare.col = squareToMove.col + 1;
+    }
+
+    rook = document.getElementsByClassName(`square-${rookPosition}`);
+
+    if (rook[0]) {
+        rookNewPosition = `square-${rookSquare.col}${rookSquare.row}`;
+        rookSquare.div = squareToMove.div;
+        rookSquare.piece = squares[parseInt(rookPosition.match(/\d{2}/)[0])].piece;
+        // only said that the rook and king have moved if it's a retransmission
+        if (!noskip) {
+            rookSquare.piece.hasMoved = true;
+            selectedPiece.object.hasMoved = true;
+        }
+        rook[0].className = rook[0].className.replace(
+            squarePositionClassName,
+            rookNewPosition
+        );
+        // // update the rook position in the squares array
+        squares[parseInt(rookPosition.match(/\d{2}/)[0])].piece = null;
+        // squares[parseInt(rookNewPosition.match(/\d{2}/)[0])].piece.possibleMoves=[];
+        // rookSquare.piece.possibleMoves = [];
+        squares[parseInt(rookNewPosition.match(/\d{2}/)[0])].piece = rookSquare.piece;
+
+        // // remove the selected piece from the squares.
+        // squares[parseInt(rookPosition.match(/\d{2}/)[0])].div.className = "square";
+    }
+}
+
+/**
+ * 
+ * @param {HtmlElement} piece 
+ */
+function createPieceObjectByHtmlElement(piece) {
+    return {
+        element: piece,
+        color: getPieceProperties(piece).color,
+        type: getPieceProperties(piece).type,
+        object: getPieceProperties(piece).pieceObject,
+        position: getPieceProperties(piece).position,
+    };
 }
 
 /**
@@ -480,7 +602,11 @@ function getPieceProperties(piece) {
     properties.type = pieceType[0][1];
 
     properties.position = getPiecePositionSquare(piece);
-
+    const sq = squares[parseInt(`${properties.position.col}${properties.position.row}`)];
+    if (sq.piece) {
+        properties.pieceObject = sq.piece;
+        return properties;
+    }
     switch (properties.type) {
         case C.PAWN:
             properties.pieceObject = new Pieces.Pawn(properties.color);
@@ -533,7 +659,7 @@ function getAvailableMoves(selectedPiece, toDisplay = true, noskip = true) {
         return;
     }
 
-    if ((selectedPiece.color === currentPlayer && currentIdColor === selectedPiece.color) || (selectedPiece.color === currentPlayer && !noskip)) {
+    if ((currentPlayer === selectedPiece.color && playerColor === selectedPiece.color) || (selectedPiece.color === currentPlayer && !noskip)) {
         const position = [selectedPiece.position.col, selectedPiece.position.row]
         /**
          * @type {T.Square[]}
@@ -544,6 +670,7 @@ function getAvailableMoves(selectedPiece, toDisplay = true, noskip = true) {
         } else {
             moves = selectedPiece.object.getPossibleMoves(position, squares);
         }
+
         displayAvailableMoves(moves, toDisplay);
 
         return moves;
@@ -588,4 +715,30 @@ function makeid(length) {
         counter += 1;
     }
     return result;
+}
+
+function isKingInCheck(kingColor) {
+
+    const king = squares.find(square => {
+        return square && square.piece && square.piece.constructor.type === C.KING && square.piece.color === kingColor;
+    });
+
+    const kingPosition = [king.col, king.row];
+
+    const opponentPieces = squares.filter((square) => {
+        return square && square.piece && square.piece.color !== kingColor;
+    });
+
+    const opponentMoves = opponentPieces.map((square) => {
+        if (square && square.piece)
+            return square.piece.getPossibleMoves([square.col, square.row], squares);
+        return [];
+    });
+
+    const opponentMovesFlatten = opponentMoves.reduce((acc, val) => acc.concat(val), []);
+
+    const isKingInCheck = opponentMovesFlatten.some((square) => {
+        return square.col === kingPosition[0] && square.row === kingPosition[1];
+    });
+    return [isKingInCheck, kingPosition];
 }
