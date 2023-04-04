@@ -16,7 +16,7 @@ export class Piece {
      * 
      * @param {String} color black or white piece
      */
-    constructor(color) {
+    constructor(color, hasMoved=false) {
         // possibleMoves = [];
         this.color = color;
     }
@@ -54,7 +54,7 @@ export class Pawn extends Piece {
     static value = 1;
 
     static type = C.PAWN;
-    constructor(color) {
+    constructor(color, hasMoved=false) {
         super(color);
         this.hasMoved = false;
     }
@@ -135,7 +135,7 @@ export class Knight extends Piece {
     static value = 3;
     static type = C.KNIGHT;
 
-    constructor(color) {
+    constructor(color, hasMoved=false) {
         super(color);
     }
 
@@ -169,7 +169,7 @@ export class Bishop extends Piece {
     static value = 3;
     static type = C.BISHOP;
 
-    constructor(color) {
+    constructor(color, hasMoved=false) {
         super(color);
     }
 
@@ -218,7 +218,7 @@ export class Rook extends Piece {
     static value = 5;
     static type = C.ROOK;
 
-    constructor(color) {
+    constructor(color, hasMoved=false) {
         super(color);
         this.hasMoved = false;
     }
@@ -267,7 +267,7 @@ export class Queen extends Piece {
     static value = 9;
     static type = C.QUEEN;
 
-    constructor(color) {
+    constructor(color, hasMoved=false) {
         super(color);
     }
 
@@ -343,9 +343,9 @@ export class King extends Piece {
     static value = 100;
     static type = C.KING;
 
-    constructor(color) {
+    constructor(color, hasMoved=false) {
         super(color);
-        this.inCkech = false;
+        this.isInCkeck = false;
         this.hasMoved = false;
     }
 

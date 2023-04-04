@@ -10,7 +10,8 @@ let opponentId;
 let playerColor;
 let currentPlayer = C.WHITE_PIECE;
 const flipClass = 'flip';
-// let idObj = {currentIdColor: currentIdColor, opponentId: opponentId};
+
+let kingIsInCheck = false; // check if the king of the player is in check
 
 const playerIdElement = document.getElementById("player-id");
 (function generateId() {
@@ -29,6 +30,9 @@ const pieces = document.querySelectorAll(".piece");
 
 const selectedPieceSquareColor = "rgba(165, 126, 53, 0.7)";
 const previousSquareColor = "rgba(165, 126, 53, 0.5)";
+const pieceDefaultBackGroundColor = "inherit";
+const kingInCheckBackGroundColor = "orange";
+
 const playButton = document.getElementById("play-button");
 // get the playerId
 
@@ -271,6 +275,7 @@ socket.on('gameAccepted', gameAccepted => {
 });
 
 socket.on('movePiece', function (squrs) {
+    console.log('squrs', squrs);
     if (squrs[3] != myId) {
         console.log('Receiving move ...');
         squrs[0].element = document.getElementsByClassName(JSON.parse(squrs[4]).className.replace(flipClass, ''))[0];
@@ -303,7 +308,8 @@ socket.on('movePiece', function (squrs) {
         }
 
         squrs[1].div = squares["" + squrs[1].col + squrs[1].row].div;
-
+            
+            console.log('squrs[0]', squrs[0]);
         movePiece(squrs[0], squrs[1], squrs[2], false);
     }
 });
@@ -316,9 +322,30 @@ socket.on('error', (err) => {
     console.error('Socket error:', err);
 });
 
-
-
-
+/**
+ * 
+ * @param {Pieces.Piece} piece 
+ * @returns 
+ */
+function createPiece(piece) {
+    if (!piece) {
+        return piece;
+    }
+    switch (piece.constructor.type) {
+        case C.PAWN:
+            return new Pieces.Pawn(piece.color, piece.hasMoved);
+        case C.KNIGHT:
+            return new Pieces.Knight(piece.color, piece.hasMoved);
+        case C.BISHOP:
+            return new Pieces.Bishop(piece.color, piece.hasMoved);
+        case C.ROOK:
+            return new Pieces.Rook(piece.color, piece.hasMoved);
+        case C.QUEEN:
+            return new Pieces.Queen(piece.color, piece.hasMoved);
+        case C.KING:
+            return new Pieces.King(piece.color, piece.hasMoved);
+    }
+}
 /**
  *
  * @param {T.Piece} selectedPiece
@@ -341,8 +368,10 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     if (previousMovedPiece) {
         previousMovedPiece.element.style.backgroundColor = "";
     }
+    if (!noskip) {
+        console.log('selectedPiece', getAvailableMoves(selectedPiece, false, noskip));
+    }
     // the square where to move might be a valid one
-
     let incl = false;
     getAvailableMoves(selectedPiece, false, noskip).forEach(move => {
         if (move.col === squareToMove.col && move.row === squareToMove.row) {
@@ -362,9 +391,33 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     const squareNewPostionClassName = `square-${squareToMove.col}${squareToMove.row}`;
     const currentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
 
-    // CASTLING
+    // check sytem
+    if (kingIsInCheck && currentPlayer === playerColor) {
+        const backupSquarePiece = createPiece(squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece);
+        const backupCurrentPiece = createPiece(squares[parseInt(currentPosition)].piece);
 
-    if ((selectedPiece.type === C.KING && !selectedPiece.object.hasMoved)) {
+        // update the square where the piece is moved
+        squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = selectedPiece.object;
+        squares[parseInt(currentPosition)].piece = null;
+
+        const [kingInCheck, kingPosition] = isKingInCheck(selectedPiece.object.color);
+        if (kingInCheck) {
+            // restore the previous state
+            squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = backupSquarePiece;
+            squares[parseInt(currentPosition)].piece = backupCurrentPiece;
+            return null;
+        }
+        squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = backupSquarePiece;
+        squares[parseInt(currentPosition)].piece = backupCurrentPiece;
+        alert("You are no longer in check");
+        kingIsInCheck = false;
+        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = false;
+        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
+
+    }
+
+    // CASTLING
+    if ((selectedPiece.type === C.KING && !selectedPiece.object.hasMoved && !selectedPiece.object.isInCheck)) {
         kingCastling(selectedPiece, squareToMove, noskip);
     }
     // move the piece
@@ -440,14 +493,24 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = squareToMove.piece;
     squares[parseInt(currentPosition)].piece = null;
 
-    const [isKingInCheck, kingPosition] = kingInCheck(currentPlayer);
+    const [kingInCheck, kingPosition] = isKingInCheck(currentPlayer);
     //let isKingInCheck= false;
-    if (isKingInCheck) {
-        console.log(currentPlayer + "king in check");
+    if (kingInCheck) {
         const king = squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)];
-        king.div.style.backgroundColor = "green";
-        console.log(king)
+        // king.div.style.backgroundColor = "orange";
+        if (currentPlayer === playerColor) {
+            alert("You are in check");
+            kingIsInCheck = true;
+            squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = true;
+            squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = kingInCheckBackGroundColor;
+        }
         return null;
+
+    } else if (currentPlayer === playerColor && kingIsInCheck) {
+        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = false;
+        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
+
+        kingIsInCheck = false;
     }
 
     return null;
@@ -607,6 +670,7 @@ function getAvailableMoves(selectedPiece, toDisplay = true, noskip = true) {
         } else {
             moves = selectedPiece.object.getPossibleMoves(position, squares);
         }
+
         displayAvailableMoves(moves, toDisplay);
 
         return moves;
@@ -653,7 +717,7 @@ function makeid(length) {
     return result;
 }
 
-function kingInCheck(kingColor) {
+function isKingInCheck(kingColor) {
 
     const king = squares.find(square => {
         return square && square.piece && square.piece.constructor.type === C.KING && square.piece.color === kingColor;
@@ -666,7 +730,7 @@ function kingInCheck(kingColor) {
     });
 
     const opponentMoves = opponentPieces.map((square) => {
-        if (square)
+        if (square && square.piece)
             return square.piece.getPossibleMoves([square.col, square.row], squares);
         return [];
     });
@@ -676,6 +740,5 @@ function kingInCheck(kingColor) {
     const isKingInCheck = opponentMovesFlatten.some((square) => {
         return square.col === kingPosition[0] && square.row === kingPosition[1];
     });
-    console.log("isKingInCheck", kingColor)
     return [isKingInCheck, kingPosition];
 }
