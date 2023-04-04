@@ -5,6 +5,13 @@ import * as T from "./types.js";
 const socket = io('ws://156.18.66.184:3000');
 import { initiateGame } from "./socket.js";
 
+// sound effects
+let captureSound = new Audio('audio/piece_capture.mp3');
+let moveSound = new Audio('audio/piece_move.mp3');
+let checkSound = new Audio('audio/check.mp3');
+let illegalMoveSound = new Audio('audio/illegal_move.mp3');
+
+
 let myId;
 let opponentId;
 let playerColor;
@@ -342,6 +349,7 @@ function createPiece(piece) {
  * @returns {T.Piece|null}
  */
 function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip = true) {
+    let soundWasPlayed = false;
     const selP = { ...selectedPiece };
     const sqtm = { ...squareToMove };
 
@@ -392,6 +400,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
     // if the move make the king to be in check we cancel it
     if (kCheck) {
+        illegalMoveSound.play();
         selectedPiece.position.piece = selectedPiece.object;
         kingIsInCheck = true;
         return selectedPiece;
@@ -428,6 +437,9 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
             ${squareToMove.piece.color}${squareToMove.piece.constructor.type}`
         );
         elements[0].parentNode.removeChild(elements[0]);
+        // play sound of capture
+        captureSound.play();
+        soundWasPlayed = true;
     }
 
     // we store this square move which will stay highlighted
@@ -489,6 +501,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     //let isKingInCheck= false;
 
     if (kingInCheck) {
+        checkSound.play();
         if (checkmate(currentPlayer, noskip)) {
             alert("Checkmate");
             socket.emit('checkmate', [myId, currentPlayer]);
@@ -498,7 +511,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
             kingIsInCheck = true;
             squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = true;
             squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = kingInCheckBackGroundColor;
-            
+
         }
         return null;
 
@@ -507,6 +520,9 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
         squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
 
         kingIsInCheck = false;
+    }
+    if (!soundWasPlayed) {
+        moveSound.play();
     }
     return null;
 }
