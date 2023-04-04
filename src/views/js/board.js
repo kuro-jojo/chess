@@ -191,12 +191,10 @@ pieces.forEach((piece) => {
                 let p = [];
                 const tmp_piece = createPieceObjectByHtmlElement(piece);
 
-                let i = 0;
                 sq.forEach(s => {
                     // if in the square there is the piece we select now we move the selected piece into that square
                     if (s && s === tmp_piece.position) {
                         playerMadeCapture = true;
-                        i = i + 1;
                         movePiece(selectedPiece, s, true);
                         return
                     }
@@ -344,6 +342,7 @@ function createPiece(piece) {
  * @returns {T.Piece|null}
  */
 function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip = true) {
+
     const selP = { ...selectedPiece };
     const sqtm = { ...squareToMove };
 
@@ -358,7 +357,7 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     if (previousMovedPiece) {
         previousMovedPiece.element.style.backgroundColor = "";
     }
-    
+
     // the square where to move might be a valid one
     let incl = false;
     getAvailableMoves(selectedPiece, false, noskip).forEach(move => {
@@ -380,30 +379,30 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     const currentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
 
     // check sytem
+    const backupSquarePiece = createPiece(squareToMove.piece);
+    const backupCurrentPiece = createPiece(selectedPiece.object);
+
+    // update the square where the piece is moved
+    squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = selectedPiece.object;
+    squares[parseInt(currentPosition)].piece = null;
+
+    const [kCheck, kPos] = isKingInCheck(selectedPiece.object.color);
+    // restore the previous state
+    squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = backupSquarePiece;
+    squares[parseInt(currentPosition)].piece = backupCurrentPiece;
+
+    // if the move make the king to be in check we cancel it
+    if (kCheck) {
+        selectedPiece.position.piece = selectedPiece.object;
+        return selectedPiece;
+    }
     if (kingIsInCheck && currentPlayer === playerColor) {
-        const backupSquarePiece = createPiece(squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece);
-        const backupCurrentPiece = createPiece(squares[parseInt(currentPosition)].piece);
-
-        // update the square where the piece is moved
-        squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = selectedPiece.object;
-        squares[parseInt(currentPosition)].piece = null;
-
-        const [kingInCheck, kingPosition] = isKingInCheck(selectedPiece.object.color);
-        if (kingInCheck) {
-            // restore the previous state
-            squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = backupSquarePiece;
-            squares[parseInt(currentPosition)].piece = backupCurrentPiece;
-            return null;
-        }
-        squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = backupSquarePiece;
-        squares[parseInt(currentPosition)].piece = backupCurrentPiece;
-        alert("You are no longer in check");
+        // alert("You are no longer in check");
         kingIsInCheck = false;
-        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = false;
-        squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
+        squares[parseInt(`${kPos[0]}${kPos[1]}`)].piece.isInCheck = false;
+        squares[parseInt(`${kPos[0]}${kPos[1]}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
 
     }
-
     // CASTLING
     if ((selectedPiece.type === C.KING && !selectedPiece.object.hasMoved && !selectedPiece.object.isInCheck)) {
         kingCastling(selectedPiece, squareToMove, noskip);
@@ -474,10 +473,10 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
     // if it's a pawn make sure not to have the possibility to move up 2 squares
     squareToMove.piece = selectedPiece.object;
 
+    // update the square where the piece is moved
     if (selectedPiece.type === C.PAWN || selectedPiece.type === C.KING || selectedPiece.type === C.ROOK) {
         squareToMove.piece.hasMoved = true;
     }
-    // update the square where the piece is moved
     squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = squareToMove.piece;
     squares[parseInt(currentPosition)].piece = null;
 
@@ -487,7 +486,6 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
         const king = squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)];
         // king.div.style.backgroundColor = "orange";
         if (currentPlayer === playerColor) {
-            alert("You are in check");
             kingIsInCheck = true;
             squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = true;
             squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = kingInCheckBackGroundColor;
@@ -580,7 +578,7 @@ function createPieceObjectByHtmlElement(piece) {
 /**
  * Returns the color and the type of the selected piece
  * @param {Element} piece The html element representing the piece
- * @returns {{color:string, type:string, pieceObject: Pieces.Piece, position:Square}}
+ * @returns {{color:string, type:string, pieceObject: Pieces.Piece, position:T.Square}}
  */
 function getPieceProperties(piece) {
     const properties = {};
@@ -591,7 +589,8 @@ function getPieceProperties(piece) {
 
     properties.position = getPiecePositionSquare(piece);
     const sq = squares[parseInt(`${properties.position.col}${properties.position.row}`)];
-    if (sq.piece) {
+    // console.log('sq', sq, properties.position)
+    if (properties.position.piece) {
         properties.pieceObject = sq.piece;
         return properties;
     }
@@ -653,11 +652,11 @@ function getAvailableMoves(selectedPiece, toDisplay = true, noskip = true) {
          * @type {T.Square[]}
          */
         let moves = [];
-        if (selectedPiece.position.piece) {
-            moves = selectedPiece.position.piece.getPossibleMoves(position, squares);
-        } else {
-            moves = selectedPiece.object.getPossibleMoves(position, squares);
-        }
+        // if (selectedPiece.position.piece) {
+        //     moves = selectedPiece.position.piece.getPossibleMoves(position, squares);
+        // } else {
+        moves = selectedPiece.object.getPossibleMoves(position, squares);
+        // }
 
         displayAvailableMoves(moves, toDisplay);
 
@@ -665,13 +664,6 @@ function getAvailableMoves(selectedPiece, toDisplay = true, noskip = true) {
     }
 
     return []
-}
-/**
- * 
- * @param {T.Square} squareToMove 
- */
-function capturePiece(squareToMove) {
-
 }
 
 function displayAvailableMoves(moves, toDisplay) {
