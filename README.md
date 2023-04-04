@@ -23,8 +23,8 @@ This is a web-based multiplayer chess game implemented in JavaScript using Node.
 
 In this we implement the following features : 
 1. Basics:
-  a. Piece movement
-  b. Capture
+   1. Piece movement
+   2. Capture
 2. King Castling (long and short)
 3. Check and Checkmate
 <!-- ## Contributing
