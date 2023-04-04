@@ -396,7 +396,7 @@ export class King extends Piece {
         }
 
         // castling
-        if (!this.hasMoved) {
+        if (!this.hasMoved && !this.isInCkeck) {
             // rooks position based on the king position
             const rookPositions = [
                 squares[parseInt(`${1}${row}`, 10)],
