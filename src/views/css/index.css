@@ -175,3 +175,7 @@ html {
 .piece {
   transition: transform 0.2s;
 }
+
+.rotateBoard {
+  transform: rotate(180deg);
+}

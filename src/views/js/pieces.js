@@ -17,7 +17,7 @@ export class Piece {
      * @param {String} color black or white piece
      */
     constructor(color) {
-        this.possibleMoves = [];
+        // possibleMoves = [];
         this.color = color;
     }
 
@@ -33,16 +33,17 @@ export class Piece {
     /**
      * Add a new move it is possible
      * @param {T.Square} obs 
+     * @param {[]} possibleMoves
      * @returns {boolean} decide if there is opponent piece so we can't move further
      */
-    checkObstacle(obs) {
+    checkObstacle(obs, possibleMoves) {
         if (obs.piece) {
             if (obs.piece.color !== this.color) {
-                this.possibleMoves.push(obs);
+                possibleMoves.push(obs);
             }
             return true;
         }
-        this.possibleMoves.push(obs)
+        possibleMoves.push(obs)
 
         // we cannot move to a square occupied by our own piece
         return false;
@@ -58,19 +59,19 @@ export class Pawn extends Piece {
         this.hasMoved = false;
     }
 
-    /**
+    /** 
      * @param {[col, row]} pawnPosition the current position (square) of the pawn
      * @param {[T.Square]} squares the square position where to move the pawn
      * 
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(pawnPosition, squares) {
-
+        let possibleMoves = [];
         // pawn can move 1 square ahead 
         if (this.color === C.WHITE_PIECE) {
             if (pawnPosition[1] < 8) {
                 // checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1]))]);
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))]);
+                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))], possibleMoves);
                 // can capture one square in diagonal
                 if (0 < pawnPosition[0] < 8) {
                     // check if there is enemy on the diagonal
@@ -78,26 +79,26 @@ export class Pawn extends Piece {
                     const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] + 1))];
 
                     // console.log(diag1, diag2)
-                    checkEnemyDiagonal(this, diag1, diag2);
+                    checkEnemyDiagonal(this, diag1, diag2, possibleMoves);
                 }
             }
             // but can move 2 if it's the first time is moving
             if (this.hasMoved !== true) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))]);
+                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))], possibleMoves);
             }
         } else if (this.color === C.BLACK_PIECE) {
             if (pawnPosition[1] > 0) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))]);
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1]))]);
+                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))], possibleMoves);
+                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1]))], possibleMoves);
                 if (0 < pawnPosition[0] < 8) {
                     const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] - 1))];
                     const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] - 1))];
 
-                    checkEnemyDiagonal(this, diag1, diag2);
+                    checkEnemyDiagonal(this, diag1, diag2, possibleMoves);
                 }
             }
             if (!this.hasMoved) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))]);
+                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))], possibleMoves);
             }
         }
         // en passant stuff
@@ -105,27 +106,28 @@ export class Pawn extends Piece {
          * @param {Pawn} piece
          * @param {T.Square} diag1 
          * @param {T.Square} diag2 
+         * @param {[]} possibleMoves
          */
-        function checkEnemyDiagonal(piece, diag1, diag2) {
+        function checkEnemyDiagonal(piece, diag1, diag2, possibleMoves) {
             if (diag1 && diag1.piece && diag1.piece.color !== piece.color) {
-                piece.possibleMoves.push(diag1);
+                possibleMoves.push(diag1);
             }
             if (diag2 && diag2.piece && diag2.piece.color !== piece.color) {
-                piece.possibleMoves.push(diag2);
+                possibleMoves.push(diag2);
             }
         }
         /**
          * 
          * @param {Pawn} piece 
          * @param {T.Square} front 
+         * @param {[]} possibleMoves
          */
-        function checkEnemyFront(piece, front) {
-            console.log("fron",front)
+        function checkEnemyFront(piece, front, possibleMoves) {
             if (front.piece === null) {
-                piece.possibleMoves.push(front);
+                possibleMoves.push(front);
             }
         }
-        return this.possibleMoves.filter((value) => value !== undefined);
+        return possibleMoves.filter((value) => value !== undefined);
     }
 }
 
@@ -144,7 +146,7 @@ export class Knight extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(knightPosition, squares) {
-        this.possibleMoves = [];
+        let possibleMoves = [];
         // 8 possible moves for a knight: 2 up/down and 1 left/right, or 2 left/right and 1 up/down
         const moves = [[2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2], [1, -2], [2, -1]];
         const [col, row] = knightPosition;
@@ -157,9 +159,9 @@ export class Knight extends Piece {
             if (c < 1 || c > 8 || r < 1 || r > 8) {
                 continue;
             }
-            this.checkObstacle(squares[parseInt(`${c}${r}`, 10)]);
+            this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves);
         }
-        return this.possibleMoves.filter((value) => value !== undefined);
+        return possibleMoves.filter((value) => value !== undefined);
     }
 }
 
@@ -178,37 +180,37 @@ export class Bishop extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(bishopPosition, squares) {
-        this.possibleMoves = [];
+        let possibleMoves = [];
         const [col, row] = bishopPosition;
 
         // up right squares
         for (let c = col + 1, r = row + 1; c <= 8 && r <= 8; c++, r++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // up left squares 
         for (let c = col - 1, r = row + 1; c > 0 && r <= 8; c--, r++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // down right squares 
         for (let c = col + 1, r = row - 1; c <= 8 && r > 0; c++, r--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // down left squares 
         for (let c = col - 1, r = row - 1; c > 0 && r > 0; c--, r--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
-        return this.possibleMoves.filter((value) => value !== undefined);
+        return possibleMoves.filter((value) => value !== undefined);
     }
 }
 
@@ -229,35 +231,35 @@ export class Rook extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(rookPosition, squares) {
-        this.possibleMoves = [];
+        let possibleMoves = [];
 
         const [col, row] = rookPosition;
         // up squares
         for (let r = row + 1; r <= 8; r++) {
-            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
         // down squares
         for (let r = row - 1; r > 0; r--) {
-            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
         // left squares
         for (let c = col - 1; c > 0; c--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)], possibleMoves)) {
                 break;
             }
         }
         // left squares
         for (let c = col + 1; c <= 8; c++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
-        return this.possibleMoves.filter((value) => value !== undefined);
+        return possibleMoves.filter((value) => value !== undefined);
     }
 }
 
@@ -277,63 +279,63 @@ export class Queen extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(queenPosition, squares) {
-        this.possibleMoves = [];
+        let possibleMoves = [];
         const [col, row] = queenPosition;
 
         // up right squares
         for (let c = col + 1, r = row + 1; c <= 8 && r <= 8; c++, r++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
                 break;
             }
         }
 
         // up left squares 
         for (let c = col - 1, r = row + 1; c > 0 && r <= 8; c--, r++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
                 break;
             }
         }
 
         // down right squares 
         for (let c = col + 1, r = row - 1; c <= 8 && r > 0; c++, r--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
                 break;
             }
         }
 
         // down left squares 
         for (let c = col - 1, r = row - 1; c > 0 && r > 0; c--, r--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
                 break;
             }
         }
 
         // up squares
         for (let r = row + 1; r <= 8; r++) {
-            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)],possibleMoves)) {
                 break;
             }
         }
         // down squares
         for (let r = row - 1; r > 0; r--) {
-            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)],possibleMoves)) {
                 break;
             }
         }
         // left squares
         for (let c = col - 1; c > 0; c--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)],possibleMoves)) {
                 break;
             }
         }
         // left squares
         for (let c = col + 1; c <= 8; c++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)])) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)],possibleMoves)) {
                 break;
             }
         }
 
-        return this.possibleMoves.filter((value) => value !== undefined);
+        return possibleMoves.filter((value) => value !== undefined);
     }
 }
 
@@ -354,43 +356,43 @@ export class King extends Piece {
      * @returns {[]} list of possible moves
      */
     getPossibleMoves(kingPosition, squares) {
-        this.possibleMoves = [];
+        let possibleMoves = [];
 
         const [col, row] = kingPosition;
         // up square
         if (row < 8) {
-            this.checkObstacle(squares[parseInt(`${col}${row + 1}`, 10)]);
+            this.checkObstacle(squares[parseInt(`${col}${row + 1}`, 10)], possibleMoves);
             // up left square
             if (col > 1) {
-                this.checkObstacle(squares[parseInt(`${col - 1}${row + 1}`, 10)]);
+                this.checkObstacle(squares[parseInt(`${col - 1}${row + 1}`, 10)], possibleMoves);
             }
             // up right square
             if (col < 8) {
-                this.checkObstacle(squares[parseInt(`${col + 1}${row + 1}`, 10)]);
+                this.checkObstacle(squares[parseInt(`${col + 1}${row + 1}`, 10)], possibleMoves);
             }
         }
 
         // down square
         if (row > 1) {
-            this.checkObstacle(squares[parseInt(`${col}${row - 1}`, 10)]);
+            this.checkObstacle(squares[parseInt(`${col}${row - 1}`, 10)], possibleMoves);
             // down left square
             if (col > 1) {
-                this.checkObstacle(squares[parseInt(`${col - 1}${row - 1}`, 10)]);
+                this.checkObstacle(squares[parseInt(`${col - 1}${row - 1}`, 10)], possibleMoves);
             }
             // down right square
             if (col < 8) {
-                this.checkObstacle(squares[parseInt(`${col + 1}${row - 1}`, 10)]);
+                this.checkObstacle(squares[parseInt(`${col + 1}${row - 1}`, 10)], possibleMoves);
             }
         }
 
         // left square
         if (col > 1) {
 
-            this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)]);
+            this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)], possibleMoves);
         }
         // right square
         if (col < 8) {
-            this.checkObstacle(squares[parseInt(`${col + 1}${row}`, 10)]);
+            this.checkObstacle(squares[parseInt(`${col + 1}${row}`, 10)], possibleMoves);
         }
 
         // castling
@@ -403,21 +405,21 @@ export class King extends Piece {
             // short castle
             if (rookPositions[1].piece !== null && rookPositions[1].piece.constructor.type === C.ROOK && !rookPositions[1].hasMoved) {
                 // check if the king can move to 2 squares to the right 
-                if (!this.checkObstacle(squares[parseInt(`${col + 1}${row}`, 10)])) {
-                    this.checkObstacle(squares[parseInt(`${col + 2}${row}`, 10)]);
+                if (!this.checkObstacle(squares[parseInt(`${col + 1}${row}`, 10)], possibleMoves)) {
+                    this.checkObstacle(squares[parseInt(`${col + 2}${row}`, 10)], possibleMoves);
                 }
             }
             // long castle
             if (rookPositions[0] !== null && rookPositions[0].piece.constructor.type === C.ROOK && !rookPositions[0].hasMoved) {
                 // check if the king can move to 3 squares to the left and if the rook is still in place and has not moved
-                if (!this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)]) &&
-                    !this.checkObstacle(squares[parseInt(`${col - 2}${row}`, 10)])) {
-                    this.checkObstacle(squares[parseInt(`${col - 3}${row}`, 10)]);
+                if (!this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)], possibleMoves) &&
+                    !this.checkObstacle(squares[parseInt(`${col - 2}${row}`, 10)], possibleMoves)) {
+                    this.checkObstacle(squares[parseInt(`${col - 3}${row}`, 10)], possibleMoves);
                 }
             }
         }
 
-        return [... new Set(this.possibleMoves.filter((value) => value !== undefined))];
+        return [... new Set(possibleMoves.filter((value) => value !== undefined))];
     }
 
 
