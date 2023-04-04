@@ -16,7 +16,7 @@ export class Piece {
      * 
      * @param {String} color black or white piece
      */
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         // possibleMoves = [];
         this.color = color;
     }
@@ -54,7 +54,7 @@ export class Pawn extends Piece {
     static value = 1;
 
     static type = C.PAWN;
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
         this.hasMoved = false;
     }
@@ -135,7 +135,7 @@ export class Knight extends Piece {
     static value = 3;
     static type = C.KNIGHT;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
     }
 
@@ -169,7 +169,7 @@ export class Bishop extends Piece {
     static value = 3;
     static type = C.BISHOP;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
     }
 
@@ -218,7 +218,7 @@ export class Rook extends Piece {
     static value = 5;
     static type = C.ROOK;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
         this.hasMoved = false;
     }
@@ -267,7 +267,7 @@ export class Queen extends Piece {
     static value = 9;
     static type = C.QUEEN;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
     }
 
@@ -284,53 +284,53 @@ export class Queen extends Piece {
 
         // up right squares
         for (let c = col + 1, r = row + 1; c <= 8 && r <= 8; c++, r++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // up left squares 
         for (let c = col - 1, r = row + 1; c > 0 && r <= 8; c--, r++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // down right squares 
         for (let c = col + 1, r = row - 1; c <= 8 && r > 0; c++, r--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // down left squares 
         for (let c = col - 1, r = row - 1; c > 0 && r > 0; c--, r--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // up squares
         for (let r = row + 1; r <= 8; r++) {
-            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
         // down squares
         for (let r = row - 1; r > 0; r--) {
-            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
         // left squares
         for (let c = col - 1; c > 0; c--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)], possibleMoves)) {
                 break;
             }
         }
         // left squares
         for (let c = col + 1; c <= 8; c++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)], possibleMoves)) {
                 break;
             }
         }
@@ -343,9 +343,9 @@ export class King extends Piece {
     static value = 100;
     static type = C.KING;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
-        this.isInCkeck = false;
+        this.isInCheck = false;
         this.hasMoved = false;
     }
 
@@ -396,7 +396,8 @@ export class King extends Piece {
         }
 
         // castling
-        if (!this.hasMoved && !this.isInCkeck) {
+        console.log(this.hasMoved, this.isInCheck);
+        if (!this.hasMoved && !this.isInCheck) {
             // rooks position based on the king position
             const rookPositions = [
                 squares[parseInt(`${1}${row}`, 10)],
