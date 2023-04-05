@@ -29,6 +29,9 @@ In this we implement the following features :
 2. King Castling (long and short)
 3. Check and Checkmate
 4. Sound effect (to make things much better)
+
+To play with another player on another machine, change the socket address from localhost to the server address
+in the board.js file.
 <!-- ## Contributing
 
 If you would like to contribute to this project, please follow these steps:
