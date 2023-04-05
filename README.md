@@ -51,6 +51,10 @@ This project is licensed under the MIT License. -->
 - [Jonathan ASSAMAGAN](https://github.com/kuro-jojo)
 - [Mouhamadou Kane](https://github.com/Mouhamadou305)
 
+## To contribute
+
+If you found any bugs or you have some advices you have the issues section
+
 ## Acknowledgments
 
 <!-- - Thanks to [Chess.js](https://github.com/jhlywa/chess.js) and [Chessboard.js](https://github.com/oakmac/chessboardjs) for providing the chess engine and the chessboard UI respectively. -->
