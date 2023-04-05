@@ -17,7 +17,7 @@ This is a web-based multiplayer chess game implemented in JavaScript using Node.
 
 1. Start the server by running `npm start`.
 2. Open your web browser and navigate to `http://localhost:3000`.
-3. Enter your opponent ID in the reserved place.
+3. Enter your opponent ID in the reserved place. Then you will have a random piece color to start the game with.
 4. Enjoy the game.
 
 ## Features
