@@ -2,8 +2,16 @@ import * as C from "./consts.js";
 import * as Pieces from "./pieces.js";
 import * as T from "./types.js";
 
-const socket = io('ws://156.18.66.184:3000');
+// const socket = io('ws://156.18.66.184:3000');
+const socket = io('ws://localhost:3000');
 import { initiateGame } from "./socket.js";
+
+// sound effects
+let captureSound = new Audio('audio/piece_capture.mp3');
+let moveSound = new Audio('audio/piece_move.mp3');
+let checkSound = new Audio('audio/check.mp3');
+let illegalMoveSound = new Audio('audio/illegal_move.mp3');
+
 
 let myId;
 let opponentId;
@@ -342,7 +350,7 @@ function createPiece(piece) {
  * @returns {T.Piece|null}
  */
 function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip = true) {
-
+    let soundWasPlayed = false;
     const selP = { ...selectedPiece };
     const sqtm = { ...squareToMove };
 
@@ -393,14 +401,21 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
     // if the move make the king to be in check we cancel it
     if (kCheck) {
+        illegalMoveSound.play();
         selectedPiece.position.piece = selectedPiece.object;
+        kingIsInCheck = true;
         return selectedPiece;
     }
     if (kingIsInCheck && currentPlayer === playerColor) {
         // alert("You are no longer in check");
         kingIsInCheck = false;
-        squares[parseInt(`${kPos[0]}${kPos[1]}`)].piece.isInCheck = false;
-        squares[parseInt(`${kPos[0]}${kPos[1]}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
+        if (selectedPiece.type === C.KING) {
+            squares[parseInt(`${selectedPiece.position.col}${selectedPiece.position.row}`)].piece.isInCheck = false;
+            squares[parseInt(`${selectedPiece.position.col}${selectedPiece.position.row}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
+        } else {
+            squares[parseInt(`${kPos[0]}${kPos[1]}`)].piece.isInCheck = false;
+            squares[parseInt(`${kPos[0]}${kPos[1]}`)].div.style.backgroundColor = pieceDefaultBackGroundColor;
+        }
 
     }
     // CASTLING
@@ -423,6 +438,9 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
             ${squareToMove.piece.color}${squareToMove.piece.constructor.type}`
         );
         elements[0].parentNode.removeChild(elements[0]);
+        // play sound of capture
+        captureSound.play();
+        soundWasPlayed = true;
     }
 
     // we store this square move which will stay highlighted
@@ -482,13 +500,19 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
     const [kingInCheck, kingPosition] = isKingInCheck(currentPlayer);
     //let isKingInCheck= false;
+
     if (kingInCheck) {
+        checkSound.play();
+        if (checkmate(currentPlayer, noskip)) {
+            alert("Checkmate");
+            socket.emit('checkmate', [myId, currentPlayer]);
+        }
         const king = squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)];
-        // king.div.style.backgroundColor = "orange";
         if (currentPlayer === playerColor) {
             kingIsInCheck = true;
             squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].piece.isInCheck = true;
             squares[parseInt(`${kingPosition[0]}${kingPosition[1]}`)].div.style.backgroundColor = kingInCheckBackGroundColor;
+
         }
         return null;
 
@@ -498,8 +522,55 @@ function movePiece(selectedPiece, squareToMove, toCapturePiece = false, noskip =
 
         kingIsInCheck = false;
     }
-
+    if (!soundWasPlayed) {
+        moveSound.play();
+    }
     return null;
+}
+
+/**
+ * whether the king is checkmated or not
+ * @param {string} pieceColor 
+ * @param {boolean} noskip 
+ * @returns {boolean} true if the king is checkmated
+ */
+function checkmate(pieceColor, noskip) {
+    for (let s = 0; s < squares.length; s++) {
+        const square = squares[s];
+        if (square && square.piece && square.piece.color === pieceColor) {
+            const htmlPiece = document.getElementsByClassName('square-' + square.col + square.row)[0];
+            if (htmlPiece) {
+                const selectedPiece = createPieceObjectByHtmlElement(htmlPiece);
+                const currentPosition = "" + selectedPiece.position.col + selectedPiece.position.row;
+                if (selectedPiece) {
+                    const moves = getAvailableMoves(selectedPiece, false, noskip, true);
+                    for (let i = 0; i < moves.length; i++) {
+                        const squareToMove = moves[i];
+                        // check sytem
+                        const backupSquarePiece = squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece;
+                        const backupCurrentPiece = squares[parseInt(currentPosition)].piece;
+                        // update the square where the piece is moved
+                        squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = selectedPiece.object;
+                        squares[parseInt(currentPosition)].piece = null;
+
+                        const [kCheck, kPos] = isKingInCheck(selectedPiece.object.color);
+                        // restore the previous state
+                        squares[parseInt(`${squareToMove.col}${squareToMove.row}`)].piece = backupSquarePiece;
+                        squares[parseInt(currentPosition)].piece = backupCurrentPiece;
+
+                        // if the move doesn't cover the check
+                        if (kCheck) {
+                            continue;
+                        }
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    console.log('GAME OVER')
+
+    return true;
 }
 
 /**
@@ -589,7 +660,7 @@ function getPieceProperties(piece) {
 
     properties.position = getPiecePositionSquare(piece);
     const sq = squares[parseInt(`${properties.position.col}${properties.position.row}`)];
-    // console.log('sq', sq, properties.position)
+
     if (properties.position.piece) {
         properties.pieceObject = sq.piece;
         return properties;
@@ -640,13 +711,13 @@ function getPiecePositionSquare(piece) {
  * 
  * @returns {T.Square[]} list of all available squares to move
  */
-function getAvailableMoves(selectedPiece, toDisplay = true, noskip = true) {
+function getAvailableMoves(selectedPiece, toDisplay = true, noskip = true, forCheckmate = false) {
 
     if (!selectedPiece) {
         return;
     }
 
-    if ((currentPlayer === selectedPiece.color && playerColor === selectedPiece.color) || (selectedPiece.color === currentPlayer && !noskip)) {
+    if ((currentPlayer === selectedPiece.color && playerColor === selectedPiece.color) || (selectedPiece.color === currentPlayer && !noskip) || (forCheckmate)) {
         const position = [selectedPiece.position.col, selectedPiece.position.row]
         /**
          * @type {T.Square[]}

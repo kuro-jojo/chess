@@ -16,7 +16,7 @@ export class Piece {
      * 
      * @param {String} color black or white piece
      */
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         // possibleMoves = [];
         this.color = color;
     }
@@ -54,7 +54,7 @@ export class Pawn extends Piece {
     static value = 1;
 
     static type = C.PAWN;
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
         this.hasMoved = false;
     }
@@ -67,29 +67,32 @@ export class Pawn extends Piece {
      */
     getPossibleMoves(pawnPosition, squares) {
         let possibleMoves = [];
+        let canMoveTwoSquares = false;
         // pawn can move 1 square ahead 
         if (this.color === C.WHITE_PIECE) {
             if (pawnPosition[1] < 8) {
-                // checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1]))]);
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))], possibleMoves);
+                if (checkEnemyFront(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 1))], possibleMoves)) {
+                    canMoveTwoSquares = true;
+                };
                 // can capture one square in diagonal
                 if (0 < pawnPosition[0] < 8) {
                     // check if there is enemy on the diagonal
                     const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] + 1))];
                     const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] + 1))];
 
-                    // console.log(diag1, diag2)
                     checkEnemyDiagonal(this, diag1, diag2, possibleMoves);
                 }
             }
             // but can move 2 if it's the first time is moving
-            if (this.hasMoved !== true) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))], possibleMoves);
+            if (this.hasMoved !== true && canMoveTwoSquares) {
+                checkEnemyFront(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] + 2))], possibleMoves);
+
             }
         } else if (this.color === C.BLACK_PIECE) {
             if (pawnPosition[1] > 0) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))], possibleMoves);
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1]))], possibleMoves);
+                if (checkEnemyFront(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 1))], possibleMoves)) {
+                    canMoveTwoSquares = true;
+                };
                 if (0 < pawnPosition[0] < 8) {
                     const diag1 = squares[parseInt("" + (pawnPosition[0] - 1) + (pawnPosition[1] - 1))];
                     const diag2 = squares[parseInt("" + (pawnPosition[0] + 1) + (pawnPosition[1] - 1))];
@@ -97,11 +100,10 @@ export class Pawn extends Piece {
                     checkEnemyDiagonal(this, diag1, diag2, possibleMoves);
                 }
             }
-            if (!this.hasMoved) {
-                checkEnemyFront(this, squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))], possibleMoves);
+            if (!this.hasMoved && canMoveTwoSquares) {
+                checkEnemyFront(squares[parseInt("" + pawnPosition[0] + (pawnPosition[1] - 2))], possibleMoves);
             }
         }
-        // en passant stuff
         /**
          * @param {Pawn} piece
          * @param {T.Square} diag1 
@@ -118,14 +120,15 @@ export class Pawn extends Piece {
         }
         /**
          * 
-         * @param {Pawn} piece 
          * @param {T.Square} front 
          * @param {[]} possibleMoves
          */
-        function checkEnemyFront(piece, front, possibleMoves) {
+        function checkEnemyFront(front, possibleMoves) {
             if (front.piece === null) {
                 possibleMoves.push(front);
+                return true;
             }
+            return false;
         }
         return possibleMoves.filter((value) => value !== undefined);
     }
@@ -135,7 +138,7 @@ export class Knight extends Piece {
     static value = 3;
     static type = C.KNIGHT;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
     }
 
@@ -169,7 +172,7 @@ export class Bishop extends Piece {
     static value = 3;
     static type = C.BISHOP;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
     }
 
@@ -218,7 +221,7 @@ export class Rook extends Piece {
     static value = 5;
     static type = C.ROOK;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
         this.hasMoved = false;
     }
@@ -267,7 +270,7 @@ export class Queen extends Piece {
     static value = 9;
     static type = C.QUEEN;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
     }
 
@@ -284,53 +287,53 @@ export class Queen extends Piece {
 
         // up right squares
         for (let c = col + 1, r = row + 1; c <= 8 && r <= 8; c++, r++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // up left squares 
         for (let c = col - 1, r = row + 1; c > 0 && r <= 8; c--, r++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // down right squares 
         for (let c = col + 1, r = row - 1; c <= 8 && r > 0; c++, r--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // down left squares 
         for (let c = col - 1, r = row - 1; c > 0 && r > 0; c--, r--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
 
         // up squares
         for (let r = row + 1; r <= 8; r++) {
-            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
         // down squares
         for (let r = row - 1; r > 0; r--) {
-            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${col}${r}`, 10)], possibleMoves)) {
                 break;
             }
         }
         // left squares
         for (let c = col - 1; c > 0; c--) {
-            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)], possibleMoves)) {
                 break;
             }
         }
         // left squares
         for (let c = col + 1; c <= 8; c++) {
-            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)],possibleMoves)) {
+            if (this.checkObstacle(squares[parseInt(`${c}${row}`, 10)], possibleMoves)) {
                 break;
             }
         }
@@ -343,9 +346,9 @@ export class King extends Piece {
     static value = 100;
     static type = C.KING;
 
-    constructor(color, hasMoved=false) {
+    constructor(color, hasMoved = false) {
         super(color);
-        this.isInCkeck = false;
+        this.isInCheck = false;
         this.hasMoved = false;
     }
 
@@ -396,7 +399,7 @@ export class King extends Piece {
         }
 
         // castling
-        if (!this.hasMoved && !this.isInCkeck) {
+        if (!this.hasMoved && !this.isInCheck) {
             // rooks position based on the king position
             const rookPositions = [
                 squares[parseInt(`${1}${row}`, 10)],
@@ -410,11 +413,10 @@ export class King extends Piece {
                 }
             }
             // long castle
-            if (rookPositions[0] !== null && rookPositions[0].piece.constructor.type === C.ROOK && !rookPositions[0].hasMoved) {
+            if (rookPositions[0].piece !== null && rookPositions[0].piece.constructor.type === C.ROOK && !rookPositions[0].hasMoved) {
                 // check if the king can move to 3 squares to the left and if the rook is still in place and has not moved
-                if (!this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)], possibleMoves) &&
-                    !this.checkObstacle(squares[parseInt(`${col - 2}${row}`, 10)], possibleMoves)) {
-                    this.checkObstacle(squares[parseInt(`${col - 3}${row}`, 10)], possibleMoves);
+                if (!this.checkObstacle(squares[parseInt(`${col - 1}${row}`, 10)], possibleMoves)) {
+                    this.checkObstacle(squares[parseInt(`${col - 2}${row}`, 10)], possibleMoves);
                 }
             }
         }

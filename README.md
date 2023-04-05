@@ -3,7 +3,8 @@
 This is a web-based multiplayer chess game implemented in JavaScript using Node.js and the following modules:
 
 - `express`
-<!-- - `socket.io` -->
+- `socket.io`
+- `connect`
 <!-- - `chess.js` -->
 <!-- - `chessboard.js` -->
 
@@ -14,11 +15,23 @@ This is a web-based multiplayer chess game implemented in JavaScript using Node.
 
 ## Usage
 
-1. Start the server by running `node index.js`.
+1. Start the server by running `npm start`.
 2. Open your web browser and navigate to `http://localhost:3000`.
-3. Create a new game or join an existing game.
-4. Play chess with your opponent.
+3. Enter your opponent ID in the reserved place. Then you will have a random piece color to start the game with.
+4. Enjoy the game.
 
+## Features
+
+In this we implement the following features : 
+1. Basics:
+   1. Piece movement
+   2. Capture
+2. King Castling (long and short)
+3. Check and Checkmate
+4. Sound effect (to make things much better)
+
+To play with another player on another machine, change the socket address from localhost to the server address
+in the board.js file.
 <!-- ## Contributing
 
 If you would like to contribute to this project, please follow these steps:
@@ -37,6 +50,10 @@ This project is licensed under the MIT License. -->
 
 - [Jonathan ASSAMAGAN](https://github.com/kuro-jojo)
 - [Mouhamadou Kane](https://github.com/Mouhamadou305)
+
+## To contribute
+
+If you found any bugs or you have some advices you have the issues section
 
 ## Acknowledgments
 
